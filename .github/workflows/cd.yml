@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repositories
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -40,7 +40,7 @@ jobs:
     needs: build   # <- Esto hace que espere a que termine build
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repositories
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
