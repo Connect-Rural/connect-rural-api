@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.controllers;
+package com.crdev.connect_rural_api.app.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
