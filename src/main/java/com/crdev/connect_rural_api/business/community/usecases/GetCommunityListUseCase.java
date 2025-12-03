@@ -1,8 +1,9 @@
 package com.crdev.connect_rural_api.business.community.usecases;
 
-import com.crdev.connect_rural_api.app.community.dto.CommunityResponseDto;
-import com.crdev.connect_rural_api.app.community.mapper.CommunityAppMapper;
+import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResponseDto;
+import com.crdev.connect_rural_api.app.community.dto.response.CommunityResponseDto;
 import com.crdev.connect_rural_api.business.community.CommunityService;
+import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +16,10 @@ public class GetCommunityListUseCase {
     private final CommunityService service;
     private final CommunityAppMapper mapper;
 
-    public List<CommunityResponseDto> execute() {
+    public List<CommunityAdminResponseDto> execute() {
         return service.getAll()
                 .stream()
-                .map(mapper::toResponse)
+                .map(mapper::toAdminResponse)
                 .collect(Collectors.toList());
     }
 }

@@ -1,6 +1,6 @@
 package com.crdev.connect_rural_api.business.community;
 
-import com.crdev.connect_rural_api.app.community.mapper.CommunityAppMapper;
+import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.community.CommunityRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,6 @@ public class CommunityService {
         return communityRepository.findAll();
     }
 
-    public Page<CommunityEntity> getAllPaginated(int page,int size){
-        return communityRepository.findAll(PageRequest.of(page, size));
-    }
-
-
     public Page<CommunityEntity> getAllPaginatedAndFiltered(String keyword, int page, int size) {
 
         Specification<CommunityEntity> spec = (root, query, cb) -> {
@@ -43,6 +38,10 @@ public class CommunityService {
         };
 
         return communityRepository.findAll(spec, PageRequest.of(page, size));
+    }
+
+    public CommunityEntity create(CommunityEntity community) {
+        return communityRepository.save(community);
     }
 
 
