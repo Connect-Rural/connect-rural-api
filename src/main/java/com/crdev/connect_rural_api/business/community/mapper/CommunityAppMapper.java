@@ -70,4 +70,16 @@ public class CommunityAppMapper {
                 .collect(Collectors.toList());
     }
 
+    public CommunityEntity updateFromDto(CreateCommunityDto dto,CommunityEntity entity){
+        if (dto == null || entity == null) return entity;
+
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        entity.setLogoUrl(dto.getLogoUrl());
+        entity.setSubscriptionPlan(dto.getSubscriptionPlan());
+
+        return entity;
+
+    }
+
 }

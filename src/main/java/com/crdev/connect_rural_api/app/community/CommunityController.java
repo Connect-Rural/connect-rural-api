@@ -5,9 +5,7 @@ import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResp
 import com.crdev.connect_rural_api.app.community.dto.response.CommunityPaginatedResponseDto;
 import com.crdev.connect_rural_api.app.community.dto.response.CommunityResponseDto;
 import com.crdev.connect_rural_api.app.community.dto.request.CommunityFilterDto;
-import com.crdev.connect_rural_api.business.community.usecases.CreateCommunityUseCase;
-import com.crdev.connect_rural_api.business.community.usecases.GetCommunityListUseCase;
-import com.crdev.connect_rural_api.business.community.usecases.GetCommunityPaginatedUseCase;
+import com.crdev.connect_rural_api.business.community.usecases.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,10 @@ import java.util.List;
 public class CommunityController {
     private final GetCommunityListUseCase communityListUseCase;
     private final GetCommunityPaginatedUseCase communityPaginatedUseCase;
+    private final GetCommunityByKeyUseCase getCommunityByKeyUC;
     private final CreateCommunityUseCase createCommunityUseCase;
+    private final UpdateCommunityUseCase updateCommunityUC;
+    private final DeleteCommunityUseCase deleteCommunityUC;
 
     @PostMapping
     public ResponseEntity<CommunityResponseDto> create(@Valid @RequestBody CreateCommunityDto request) {
@@ -36,6 +37,10 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{key}")
+    public ResponseEntity<CommunityAdminResponseDto> getByKey(@PathVariable String key) {
+        return ResponseEntity.ok(getCommunityByKeyUC.execute(key));
+    }
 
     @GetMapping("/paginated")
     public ResponseEntity<CommunityPaginatedResponseDto> getPaginated(
@@ -47,5 +52,16 @@ public class CommunityController {
         return ResponseEntity.ok(
                 communityPaginatedUseCase.execute(filter)
         );
+    }
+
+    @PatchMapping("/{key}")
+    public ResponseEntity<CommunityAdminResponseDto> updateCommunity(@PathVariable String key, @Valid @RequestBody CreateCommunityDto updateRequest) {
+        return ResponseEntity.ok(updateCommunityUC.execute(key, updateRequest));
+    }
+
+    @DeleteMapping("/{key}")
+    public ResponseEntity<?> deleteCommunity(@PathVariable String key) {
+        deleteCommunityUC.execute(key);
+        return ResponseEntity.noContent().build();
     }
 }

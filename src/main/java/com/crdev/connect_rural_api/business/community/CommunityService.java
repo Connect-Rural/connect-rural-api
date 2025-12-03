@@ -8,6 +8,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -44,6 +46,17 @@ public class CommunityService {
         return communityRepository.save(community);
     }
 
+    public CommunityEntity getBykey(String key) {
+        return communityRepository.findById( UUID.fromString(key)).orElseThrow(() -> new IllegalArgumentException("Community not found"));
+    }
+
+    public CommunityEntity update(CommunityEntity entity) {
+        return communityRepository.save(entity);
+    }
+
+    public void delete(String key) {
+        communityRepository.deleteById(UUID.fromString(key));
+    }
 
 
 }
