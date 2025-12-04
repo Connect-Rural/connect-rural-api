@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommunityFilterRequestDto {
+public class CommunityFilterDto {
     private String keyword;
     private Integer page;
     private Integer size;

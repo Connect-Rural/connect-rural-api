@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.app.community.dto;
+package com.crdev.connect_rural_api.app.community.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommunityPaginatedResponseDto {
-    private List<CommunityResponseDto> data;
+    private List<CommunityAdminResponseDto> data;
     private int page;
     private int size;
     private long totalElements;

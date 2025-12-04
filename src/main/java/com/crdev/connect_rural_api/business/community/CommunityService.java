@@ -1,6 +1,6 @@
 package com.crdev.connect_rural_api.business.community;
 
-import com.crdev.connect_rural_api.app.community.mapper.CommunityAppMapper;
+import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.community.CommunityRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -21,11 +23,6 @@ public class CommunityService {
     public List<CommunityEntity> getAll() {
         return communityRepository.findAll();
     }
-
-    public Page<CommunityEntity> getAllPaginated(int page,int size){
-        return communityRepository.findAll(PageRequest.of(page, size));
-    }
-
 
     public Page<CommunityEntity> getAllPaginatedAndFiltered(String keyword, int page, int size) {
 
@@ -45,6 +42,21 @@ public class CommunityService {
         return communityRepository.findAll(spec, PageRequest.of(page, size));
     }
 
+    public CommunityEntity create(CommunityEntity community) {
+        return communityRepository.save(community);
+    }
+
+    public CommunityEntity getBykey(String key) {
+        return communityRepository.findById( UUID.fromString(key)).orElseThrow(() -> new IllegalArgumentException("Community not found"));
+    }
+
+    public CommunityEntity update(CommunityEntity entity) {
+        return communityRepository.save(entity);
+    }
+
+    public void delete(String key) {
+        communityRepository.deleteById(UUID.fromString(key));
+    }
 
 
 }

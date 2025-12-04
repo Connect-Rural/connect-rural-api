@@ -1,25 +1,20 @@
 package com.crdev.connect_rural_api.business.community.usecases;
 
 import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResponseDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityResponseDto;
 import com.crdev.connect_rural_api.business.community.CommunityService;
 import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
-@AllArgsConstructor
-public class GetCommunityListUseCase {
+@RequiredArgsConstructor
+public class GetCommunityByKeyUseCase {
+
     private final CommunityService service;
     private final CommunityAppMapper mapper;
 
-    public List<CommunityAdminResponseDto> execute() {
-        return service.getAll()
-                .stream()
-                .map(mapper::toAdminResponse)
-                .collect(Collectors.toList());
+    public CommunityAdminResponseDto execute(String key) {
+        var entity = service.getBykey(key);
+        return mapper.toAdminResponse(entity);
     }
 }
