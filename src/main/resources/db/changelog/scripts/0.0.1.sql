@@ -19,3 +19,26 @@ CREATE TABLE IF NOT EXISTS communities (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- changeset israel-CR:031225-001
+CREATE TABLE IF NOT EXISTS residents(
+    resident_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    community_key UUID NOT NULL,
+    first_name VARCHAR(200) NOT NULL,
+    last_name VARCHAR(200) NULL,
+    birth_date DATE NOT NULL,
+    phone_number VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+    address TEXT NULL,
+    address_reference TEXT NULL,
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_resident_community FOREIGN KEY(community_key)
+     REFERENCES communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_resident_community_key ON residents(community_key);
