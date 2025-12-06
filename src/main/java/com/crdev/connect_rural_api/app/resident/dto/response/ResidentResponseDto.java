@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -15,6 +16,8 @@ private  String communityKey;
 private  String firstName;
 private  String lastName;
 private  String address;
-private  Date   joinedAt;
+private  String email;
+private  String phoneNumber;
+private  LocalDate joinedAt;
 private  Boolean active;
 }

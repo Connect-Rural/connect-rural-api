@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class ResidentEntity {
     @Column(name = "last_name")
     private String lastName;
     @Column(name = "birth_date", nullable = false)
-    private Date birthDate;
+    private LocalDate birthDate;
     @Column(name = "phone_number")
     private String phoneNumber;
     @Column(name = "email")
@@ -35,7 +36,7 @@ public class ResidentEntity {
     @Column(name = "address_reference")
     private String addressReference;
     @Column(name = "joined_at", nullable = false)
-    private Date joinedAt;
+    private LocalDate joinedAt;
     @Column(name = "active")
     private Boolean active;
     @Column(name = "created_at" , updatable = false)

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static com.crdev.connect_rural_api.business.resident.specs.ResidentSpecs.*;
 
 
 @Service
@@ -33,5 +32,22 @@ public class ResidentService {
         );
 
         return residentRepository.findAll(spec, PageRequest.of(page, size));
+    }
+
+    public ResidentEntity getByKey(String communityKey,String residentKey){
+        return  residentRepository.findByCommunityKeyAndKey(UUID.fromString(communityKey),UUID.fromString(residentKey))
+                .orElseThrow(() -> new IllegalArgumentException("Resident not found"));
+    }
+
+    public ResidentEntity create(ResidentEntity resident){
+        return residentRepository.save(resident);
+    }
+
+    public ResidentEntity update(ResidentEntity entity) {
+        return residentRepository.save(entity);
+    }
+
+    public void delete(String key) {
+        residentRepository.deleteById(UUID.fromString(key));
     }
 }
