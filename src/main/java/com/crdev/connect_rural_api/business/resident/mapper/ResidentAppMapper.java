@@ -28,6 +28,7 @@ public class ResidentAppMapper {
                 address,
                 entity.getEmail(),
                 entity.getPhoneNumber(),
+                entity.getBirthDate(),
                 entity.getJoinedAt(),
                 entity.getActive()
 

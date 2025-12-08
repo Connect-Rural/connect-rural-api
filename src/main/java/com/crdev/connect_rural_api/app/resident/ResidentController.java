@@ -72,3 +72,4 @@ public class ResidentController {
         return ResponseEntity.noContent().build();
     }
 }
+    
