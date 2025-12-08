@@ -42,3 +42,28 @@ CREATE TABLE IF NOT EXISTS residents(
 );
 
 CREATE INDEX IF NOT EXISTS idx_resident_community_key ON residents(community_key);
+
+
+-- changeset israel-CR:071225-001
+CREATE TABLE IF NOT EXISTS cooperations (
+    cooperation_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    community_key UUID NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    base_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    due_date DATE NULL,
+    allow_late_fee BOOLEAN DEFAULT FALSE,
+    late_fee_amount DECIMAL(12,2) NULL,
+    late_fee_period VARCHAR(50) NULL,
+    assignment_type VARCHAR(200) NULL,
+    status VARCHAR(100) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cooperation_community FOREIGN KEY(community_key)
+     REFERENCES communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_cooperation_community_key ON cooperations(community_key);
