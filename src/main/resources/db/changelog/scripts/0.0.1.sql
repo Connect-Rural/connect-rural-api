@@ -67,3 +67,28 @@ CREATE TABLE IF NOT EXISTS cooperations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cooperation_community_key ON cooperations(community_key);
+
+
+
+-- changeset israel-CR:201225-001
+
+CREATE TABLE IF NOT EXISTS cooperation_residents (
+    cooperation_resident_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    resident_key UUID NOT NULL,
+    cooperation_key UUID NOT NULL,
+    is_paid BOOLEAN DEFAULT FALSE,
+    amount_paid DECIMAL(12,2) DEFAULT 0.00,
+    paid_at   TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_resident_cooperation_resident FOREIGN KEY(resident_key)
+     REFERENCES residents(resident_key) ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_resident_cooperation_cooperation FOREIGN KEY(cooperation_key)
+     REFERENCES cooperations(cooperation_key) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_cooperation_resident_resident_key ON cooperation_residents(resident_key);
+CREATE INDEX IF NOT EXISTS idx_cooperation_resident_cooperation_key ON cooperation_residents(cooperation_key);

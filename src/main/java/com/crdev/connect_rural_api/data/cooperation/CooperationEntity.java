@@ -14,6 +14,7 @@ import java.util.UUID;
 @Table(name = "cooperations")
 public class CooperationEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "cooperation_key", nullable = false, updatable = false)
     private UUID key;
     @Column(name = "community_key", nullable = false)
