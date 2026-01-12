@@ -59,5 +59,10 @@ public class CooperationResidentService {
     }
 
 
+    public List<CooperationResidentEntity> listByCooperation(String cooperationKey) {
+        return cooperationResidentRepository.findByCooperationKey(fromString(cooperationKey));
+    }
+
+
 
 }

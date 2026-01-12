@@ -18,9 +18,9 @@ public class CooperationSummaryResponseDto {
     private BigDecimal baseAmount;
     private String status;
     private double progressPercentage;
-    private int totalResidentsAssigned;
-    private int totalResidentsPaid;
-    private int totalResidentsPending;
+    private int totalAssignedResidents;
+    private int paidResidents;
+    private int pendingResidents;
     private LocalDate startDate;
     private LocalDate dueDate;
 

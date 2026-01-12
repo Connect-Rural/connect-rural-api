@@ -34,21 +34,17 @@ public class CooperationAppMapper {
                 entity.getStatus(),
                 progress,
                 totalAssigned,
-                totalPending,
                 totalPaid,
+                totalPending,
                 entity.getStartDate(),
                 entity.getDueDate()
         );
     }
 
-    public List<CooperationSummaryResponseDto> toResponseSummaryList(List<CooperationEntity> entities) {
-        if (entities == null) return null;
-        return entities.stream()
-                .map(this::toResponseSummaryDto)
-                .collect(Collectors.toList());
-    }
-
-    public CooperationResponseDto toResponseDto(CooperationEntity entity) {
+    public CooperationResponseDto toResponseDto(CooperationEntity entity,
+                                                List<String> assignedResidents,
+                                                List<String> excludedResidents
+                                                ) {
         if (entity == null) return null;
 
         return new CooperationResponseDto(
@@ -61,8 +57,8 @@ public class CooperationAppMapper {
                 entity.getDueDate(),
                 entity.getStatus(),
                 entity.getAssignmentType(),
-                new ArrayList<>(),
-                new ArrayList<>(),
+                assignedResidents,
+                excludedResidents,
                 entity.getAllowLateFee(),
                 entity.getLateFeeAmount(),
                 entity.getLateFeePeriod()
