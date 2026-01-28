@@ -2,6 +2,7 @@ package com.crdev.connect_rural_api.app.cooperation;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.request.CooperationFilterDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequestDto;
+import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationDetailResponseDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationResponseDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryPaginatedResponseDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryResponseDto;
@@ -21,6 +22,7 @@ public class CooperationController {
     private final GetCooperationListUseCase getCooperationListUC;
     private final GetCooperationPaginatedUseCase getCooperationPaginatedUC;
     private final GetCooperationByKeyUseCase getCooperationByKeyUC;
+    private final GetCooperationDetailByKeyUseCase getCooperationDetailByKeyUC;
     private final CreateCooperationUseCase createCooperationUC;
     private final UpdateCooperationUseCase updateCooperationUC;
     private final DeleteCooperationUseCase deleteCooperationUC;
@@ -46,6 +48,13 @@ public class CooperationController {
     @GetMapping("/{cooperationKey}")
     public ResponseEntity<CooperationResponseDto>getByKey(@PathVariable String communityKey, @PathVariable String cooperationKey) {
         return ResponseEntity.ok(getCooperationByKeyUC.execute(communityKey, cooperationKey));
+    }
+
+    @GetMapping("/{cooperationKey}/detail")
+    public ResponseEntity<CooperationDetailResponseDto> getDetailByKey(
+            @PathVariable String communityKey,
+            @PathVariable String cooperationKey) {
+        return ResponseEntity.ok(getCooperationDetailByKeyUC.execute(communityKey, cooperationKey));
     }
 
     @PostMapping

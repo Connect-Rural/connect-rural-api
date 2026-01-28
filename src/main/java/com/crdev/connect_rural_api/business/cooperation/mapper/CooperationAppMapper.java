@@ -1,18 +1,15 @@
 package com.crdev.connect_rural_api.business.cooperation.mapper;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequestDto;
+import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationDetailResponseDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationResponseDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryResponseDto;
-import com.crdev.connect_rural_api.app.resident.dto.request.CreateResidentDto;
+import com.crdev.connect_rural_api.app.cooperation.dto.response.ResidentAssigned;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
-import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CooperationAppMapper {
@@ -84,6 +81,35 @@ public class CooperationAppMapper {
 
         return entity;
 
+    }
+
+    public CooperationDetailResponseDto toDetailResponseDto(
+            CooperationEntity entity,
+            List<ResidentAssigned> assignments,
+            double progressPercentage,
+            int totalAssignedResidents,
+            int paidResidents,
+            int pendingResidents) {
+        if (entity == null) return null;
+
+        return new CooperationDetailResponseDto(
+                entity.getKey().toString(),
+                entity.getCommunityKey().toString(),
+                entity.getName(),
+                entity.getDescription(),
+                entity.getBaseAmount(),
+                entity.getStartDate(),
+                entity.getDueDate(),
+                entity.getStatus(),
+                assignments,
+                progressPercentage,
+                totalAssignedResidents,
+                paidResidents,
+                pendingResidents,
+                entity.getAllowLateFee(),
+                entity.getLateFeeAmount(),
+                entity.getLateFeePeriod()
+        );
     }
 
 }
