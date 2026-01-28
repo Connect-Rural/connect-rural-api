@@ -4,6 +4,7 @@ import com.crdev.connect_rural_api.business.resident.specs.ResidentSpecs;
 import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentRepository;
+import com.crdev.connect_rural_api.data.resident.SimpleResident;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,5 +50,9 @@ public class ResidentService {
 
     public void delete(String key) {
         residentRepository.deleteById(UUID.fromString(key));
+    }
+
+    public List<SimpleResident> getResidentsCatalogByCommunityKey(String communityKey) {
+        return residentRepository.getResidentsCatalogByCommunityKey(UUID.fromString(communityKey));
     }
 }

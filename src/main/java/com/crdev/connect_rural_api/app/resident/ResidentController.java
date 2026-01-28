@@ -7,6 +7,7 @@ import com.crdev.connect_rural_api.app.resident.dto.request.ResidentFilterDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentDetailResponseDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentPaginatedResponseDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentResponseDto;
+import com.crdev.connect_rural_api.app.resident.dto.response.SimpleResidentResponseDto;
 import com.crdev.connect_rural_api.business.resident.usecases.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ResidentController {
     private final GetResidentListByCommunityKeyUseCase getResidentListByCommunityKeyUC;
     private final GetResidentPaginatedUseCase getResidentPaginatedUC;
+    private final GetResidentsCatalogUseCase getResidentsCatalogUC;
     private final GetResidentByKeyUseCase getResidentByKeyUC;
     private final CreateResidentUseCase createResidentUC;
     private final UpdateResidentUseCase updateResidentUC;
@@ -43,6 +45,10 @@ public class ResidentController {
         return ResponseEntity.ok(
                 getResidentPaginatedUC.execute(communityKey,filter)
         );
+    }
+    @GetMapping("/catalog")
+    public ResponseEntity<List<SimpleResidentResponseDto>> getCatalog(@PathVariable String communityKey) {
+        return ResponseEntity.ok(getResidentsCatalogUC.execute(communityKey));
     }
 
     @GetMapping("/{residentKey}")
