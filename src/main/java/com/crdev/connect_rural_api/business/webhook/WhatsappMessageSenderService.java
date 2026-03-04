@@ -25,8 +25,18 @@ public class WhatsappMessageSenderService {
         sendTextMessage(defaultPhoneNumberId, to, text);
     }
 
+    // México: WhatsApp envía el 'from' con formato legacy 521XXXXXXXXXX (13 dígitos).
+    // La API de envío requiere 52XXXXXXXXXX (12 dígitos). Se elimina el '1' intermedio.
+    private String normalizePhoneNumber(String phone) {
+        if (phone != null && phone.startsWith("521") && phone.length() == 13) {
+            return "52" + phone.substring(3);
+        }
+        return phone;
+    }
+
     public void sendTextMessage(String phoneNumberId, String to, String text) {
         String url = "/" + apiVersion + "/" + phoneNumberId + "/messages";
+        to = normalizePhoneNumber(to);
 
         Map<String, Object> body = Map.of(
                 "messaging_product", "whatsapp",
