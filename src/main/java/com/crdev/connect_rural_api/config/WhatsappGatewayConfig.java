@@ -6,19 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class WhatsappApiConfig {
+public class WhatsappGatewayConfig {
 
-    @Value("${whatsapp.api.base-url}")
-    private String baseUrl;
+    @Value("${whatsapp.gateway.url}")
+    private String gatewayUrl;
 
-    @Value("${whatsapp.api.access-token}")
-    private String accessToken;
+    @Value("${whatsapp.gateway.api-key}")
+    private String apiKey;
 
     @Bean
-    public RestClient whatsappRestClient() {
+    public RestClient whatsappGatewayClient() {
         return RestClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader("Authorization", "Bearer " + accessToken)
+                .baseUrl(gatewayUrl)
+                .defaultHeader("X-API-Key", apiKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

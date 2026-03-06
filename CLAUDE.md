@@ -20,7 +20,7 @@ mvn test -Dtest=ClassName   # Run a single test class
 docker-compose up --build   # Build and start container
 ```
 
-Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance.
+Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance. Also `WHATSAPP_GATEWAY_URL` and `WHATSAPP_GATEWAY_API_KEY` for WhatsApp integration.
 
 Tests use an H2 in-memory database with profile `test` (see `src/test/resources/application-test.properties`).
 
@@ -64,8 +64,17 @@ connect-rural-api/
 │   │   │   │       ├── mapper/ResidentAppMapper.java
 │   │   │   │       ├── specs/ResidentSpecs.java
 │   │   │   │       └── usecases/
+│   │   │   │   ├── whatsapp/
+│   │   │   │   │   ├── WhatsappGatewayCallbackController.java  ← recibe eventos del gateway
+│   │   │   │   │   └── dto/request/   ← GatewayEventDto, GatewayMessageDto, GatewayStatusDto,
+│   │   │   │   │                          SendWhatsappMessageDto
+│   │   │   ├── business/
+│   │   │   │   ├── whatsapp/
+│   │   │   │   │   ├── WhatsappGatewayService.java  ← envía mensajes al gateway via HTTP
+│   │   │   │   │   └── usecases/      ← ProcessGatewayEventUseCase, SendWhatsappMessageUseCase
 │   │   │   ├── config/
-│   │   │   │   └── CorsConfig.java
+│   │   │   │   ├── CorsConfig.java
+│   │   │   │   └── WhatsappGatewayConfig.java  ← RestClient con X-API-Key
 │   │   │   └── data/
 │   │   │       ├── community/    ← CommunityEntity, CommunityRepository
 │   │   │       ├── cooperation/  ← CooperationEntity, CooperationRepository
@@ -111,6 +120,15 @@ All domain modules follow the same internal structure under both `app/` and `bus
 - **resident** – Scoped to a community. Routes: `/api/{communityKey}/residents`
 - **cooperation** – Payment collection system scoped to a community. Routes: `/api/{communityKey}/cooperations`
 - **cooperationResident** – Junction table tracking resident ↔ cooperation assignments and payment status. Managed only via `CooperationResidentService`; no dedicated controller.
+- **whatsapp** – Integración con `whatsapp-gateway`. Recibe eventos normalizados en `POST /api/whatsapp/events` y envía mensajes vía `WhatsappGatewayService`. No tiene capa `data/` propia.
+
+### WhatsApp Gateway Integration
+
+connect-rural-api es un **tenant** del `whatsapp-gateway`. Flujo:
+- **Entrante**: gateway → `POST /api/whatsapp/events` → `ProcessGatewayEventUseCase`
+- **Saliente**: `SendWhatsappMessageUseCase` → `WhatsappGatewayService` → `POST {gateway}/api/messages/send` (header `X-API-Key`)
+
+El tenant debe estar registrado en el gateway con `callbackUrl = https://{connect-rural-api}/api/whatsapp/events`.
 
 ### Database Migrations
 
