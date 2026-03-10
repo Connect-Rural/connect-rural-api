@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +23,5 @@ public class CommunityAdminResponseDto {
     private Number membersCount;
     private Number usersCount;
     private Boolean active;
+    private UUID whatsappAppKey;
 }

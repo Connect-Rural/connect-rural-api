@@ -29,7 +29,8 @@ public class CommunityAppMapper {
                 entity.getCompletedConfiguration(),
                 entity.getActive(),
                 entity.getCreateAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getWhatsappAppKey()
         );
     }
 
@@ -52,7 +53,8 @@ public class CommunityAppMapper {
                 "",
                 1,
                 2,
-                entity.getActive()
+                entity.getActive(),
+                entity.getWhatsappAppKey()
         );
     }
 

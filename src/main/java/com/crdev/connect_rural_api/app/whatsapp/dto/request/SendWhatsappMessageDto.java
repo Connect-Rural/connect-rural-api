@@ -1,7 +1,6 @@
 package com.crdev.connect_rural_api.app.whatsapp.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,7 +14,7 @@ public class SendWhatsappMessageDto {
     @NotBlank
     private String to;
 
-    @NotNull
+    @NotBlank
     private String type;
 
     // TEXT

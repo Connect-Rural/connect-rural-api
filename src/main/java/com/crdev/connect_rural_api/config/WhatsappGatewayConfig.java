@@ -11,15 +11,12 @@ public class WhatsappGatewayConfig {
     @Value("${whatsapp.gateway.url}")
     private String gatewayUrl;
 
-    @Value("${whatsapp.gateway.api-key}")
-    private String apiKey;
-
     @Bean
     public RestClient whatsappGatewayClient() {
         return RestClient.builder()
                 .baseUrl(gatewayUrl)
-                .defaultHeader("X-API-Key", apiKey)
                 .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Accept", "application/json")
                 .build();
     }
 }

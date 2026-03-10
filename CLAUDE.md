@@ -20,7 +20,7 @@ mvn test -Dtest=ClassName   # Run a single test class
 docker-compose up --build   # Build and start container
 ```
 
-Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance. Also `WHATSAPP_GATEWAY_URL` and `WHATSAPP_GATEWAY_API_KEY` for WhatsApp integration.
+Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance. Also `WHATSAPP_GATEWAY_URL` (URL del gateway, default `http://localhost:8081`) y `APP_BASE_URL` (URL pública de este servicio, default `http://localhost:8080`) para la integración WhatsApp. El `appKey` por comunidad se almacena en `community.whatsappAppKey` en BD — no hay una variable global de tenant.
 
 Tests use an H2 in-memory database with profile `test` (see `src/test/resources/application-test.properties`).
 
@@ -124,11 +124,30 @@ All domain modules follow the same internal structure under both `app/` and `bus
 
 ### WhatsApp Gateway Integration
 
-connect-rural-api es un **tenant** del `whatsapp-gateway`. Flujo:
-- **Entrante**: gateway → `POST /api/whatsapp/events` → `ProcessGatewayEventUseCase`
-- **Saliente**: `SendWhatsappMessageUseCase` → `WhatsappGatewayService` → `POST {gateway}/api/messages/send` (header `X-API-Key`)
+Cada **comunidad** puede ser un tenant independiente en el `whatsapp-gateway` (una cuenta de WhatsApp Business distinta por comunidad). El `tenantKey` del gateway se almacena en `community.whatsappAppKey`.
 
-El tenant debe estar registrado en el gateway con `callbackUrl = https://{connect-rural-api}/api/whatsapp/events`.
+**Flujo entrante** (Meta → gateway → connect-rural-api):
+1. Gateway llama `POST /api/whatsapp/events` con `GatewayEventDto`
+2. `ProcessGatewayEventUseCase` resuelve la comunidad por `whatsappAppKey = event.tenantKey`
+3. Aplica lógica de negocio de esa comunidad
+
+**Flujo saliente** (connect-rural-api → gateway → Meta):
+1. `SendWhatsappMessageUseCase.execute(appKey, to, text)` → `WhatsappGatewayService`
+2. `POST {gateway}/api/messages/send?appKey={communityWhatsappAppKey}`
+
+**Registro de tenant** (administración):
+- `POST /api/communities/{key}/whatsapp` + `{phoneNumberId, accessToken}` → llama `POST {gateway}/api/tenants`, guarda appKey en la comunidad
+- `DELETE /api/communities/{key}/whatsapp` → elimina tenant del gateway y limpia appKey
+
+**Notificación a residente**:
+- `NotifyResidentUseCase.execute(communityKey, residentKey, message)` — requiere `community.whatsappAppKey` y `resident.phoneNumber`
+
+**Use cases WhatsApp** en `business/whatsapp/usecases/`:
+- `ProcessGatewayEventUseCase` — procesa eventos entrantes del gateway
+- `SendWhatsappMessageUseCase` — envía mensajes vía gateway
+- `RegisterCommunityTenantUseCase` — registra comunidad como tenant en el gateway
+- `UnlinkCommunityTenantUseCase` — desvincula comunidad del gateway
+- `NotifyResidentUseCase` — envía mensaje a un residente por WhatsApp
 
 ### Database Migrations
 

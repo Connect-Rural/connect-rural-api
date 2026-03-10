@@ -41,6 +41,8 @@ public class CommunityEntity {
     private String subscriptionPlan;
     @Column(name = "completed_configuration")
     private Boolean completedConfiguration;
+    @Column(name = "whatsapp_app_key")
+    private UUID whatsappAppKey;
     @Column(name = "active")
     private Boolean active;
     @Column(name = "created_at", updatable = false)

@@ -15,17 +15,18 @@ public class CreateCommunityUseCase {
     private final CommunityAppMapper mapper;
 
     public CommunityResponseDto execute(CreateCommunityDto dto) {
-         var communityEntity = new CommunityEntity(
+        var communityEntity = new CommunityEntity(
                 null,
-                 dto.getName(),
+                dto.getName(),
                 dto.getDescription(),
-                 dto.getLogoUrl(),
+                dto.getLogoUrl(),
                 null,
                 null,
                 null,
                 null,
                 dto.getSubscriptionPlan(),
                 false,
+                null,
                 true,
                 null,
                 null

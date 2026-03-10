@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,5 +24,6 @@ public class CommunityResponseDto {
     private Boolean active;
     private Date createdAt;
     private Date updatedAt;
+    private UUID whatsappAppKey;
 
 }
