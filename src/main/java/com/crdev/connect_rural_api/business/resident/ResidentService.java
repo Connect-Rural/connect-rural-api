@@ -1,7 +1,6 @@
 package com.crdev.connect_rural_api.business.resident;
 
 import com.crdev.connect_rural_api.business.resident.specs.ResidentSpecs;
-import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentRepository;
 import lombok.RequiredArgsConstructor;

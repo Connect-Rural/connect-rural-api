@@ -1,7 +1,6 @@
 package com.crdev.connect_rural_api.business.community.usecases;
 
 import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResponseDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityResponseDto;
 import com.crdev.connect_rural_api.business.community.CommunityService;
 import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import lombok.AllArgsConstructor;

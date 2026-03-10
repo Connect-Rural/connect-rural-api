@@ -1,6 +1,5 @@
 package com.crdev.connect_rural_api.business.community;
 
-import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.community.CommunityRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +18,6 @@ import org.springframework.data.domain.PageRequest;
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
-    private final CommunityAppMapper dataMapper;
-
     public List<CommunityEntity> getAll() {
         return communityRepository.findAll();
     }

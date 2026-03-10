@@ -1,7 +1,5 @@
 package com.crdev.connect_rural_api.app.resident;
 
-import com.crdev.connect_rural_api.app.community.dto.request.CreateCommunityDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResponseDto;
 import com.crdev.connect_rural_api.app.resident.dto.request.CreateResidentDto;
 import com.crdev.connect_rural_api.app.resident.dto.request.ResidentFilterDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentDetailResponseDto;
