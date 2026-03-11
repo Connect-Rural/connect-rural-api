@@ -43,3 +43,51 @@ CREATE TABLE IF NOT EXISTS connect_rural.residents(
 );
 
 CREATE INDEX IF NOT EXISTS idx_resident_community_key ON connect_rural.residents(community_key);
+
+
+-- changeset israel-CR:071225-001
+CREATE TABLE IF NOT EXISTS connect_rural.cooperations (
+    cooperation_key UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+    community_key UUID NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    base_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    due_date DATE NULL,
+    allow_late_fee BOOLEAN DEFAULT FALSE,
+    late_fee_amount DECIMAL(12,2) NULL,
+    late_fee_period VARCHAR(50) NULL,
+    assignment_type VARCHAR(200) NULL,
+    status VARCHAR(100) NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cooperation_community FOREIGN KEY(community_key)
+     REFERENCES connect_rural.communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_cooperation_community_key ON connect_rural.cooperations(community_key);
+
+
+-- changeset israel-CR:201225-001
+CREATE TABLE IF NOT EXISTS connect_rural.cooperation_residents (
+    cooperation_resident_key UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+    resident_key UUID NOT NULL,
+    cooperation_key UUID NOT NULL,
+    is_paid BOOLEAN DEFAULT FALSE,
+    amount_paid DECIMAL(12,2) DEFAULT 0.00,
+    paid_at   TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_resident_cooperation_resident FOREIGN KEY(resident_key)
+     REFERENCES connect_rural.residents(resident_key) ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_resident_cooperation_cooperation FOREIGN KEY(cooperation_key)
+     REFERENCES connect_rural.cooperations(cooperation_key) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_cooperation_resident_resident_key ON connect_rural.cooperation_residents(resident_key);
+CREATE INDEX IF NOT EXISTS idx_cooperation_resident_cooperation_key ON connect_rural.cooperation_residents(cooperation_key);

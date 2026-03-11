@@ -3,7 +3,9 @@ package com.crdev.connect_rural_api.business.resident.mapper;
 import com.crdev.connect_rural_api.app.resident.dto.request.CreateResidentDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentDetailResponseDto;
 import com.crdev.connect_rural_api.app.resident.dto.response.ResidentResponseDto;
+import com.crdev.connect_rural_api.app.resident.dto.response.SimpleResidentResponseDto;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
+import com.crdev.connect_rural_api.data.resident.SimpleResident;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -76,5 +78,15 @@ public class ResidentAppMapper {
 
         return entity;
 
+    }
+
+    public SimpleResidentResponseDto toSimpleResident(SimpleResident data){
+        if (data == null) return null;
+        String fullName = data.getFirstName() + " " + data.getLastName();
+        return new SimpleResidentResponseDto(
+                data.getKey().toString(),
+                data.getCommunityKey().toString(),
+                fullName
+        );
     }
 }

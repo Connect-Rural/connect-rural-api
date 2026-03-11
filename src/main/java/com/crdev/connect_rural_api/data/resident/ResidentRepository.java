@@ -13,5 +13,5 @@ public interface ResidentRepository extends JpaRepository<ResidentEntity, UUID>,
     List<ResidentEntity> findAllByCommunityKey(UUID communityKey);
     Optional<ResidentEntity> findByCommunityKeyAndKey(UUID communityKey, UUID residentKey);
 
-
+    List<SimpleResident> getResidentsCatalogByCommunityKey(UUID communityKey);
 }
