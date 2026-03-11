@@ -18,8 +18,8 @@
 
 ```sql
 -- changeset israel-CR:{DDMMYY}-001
-CREATE TABLE IF NOT EXISTS {table_name} (
-    {table_singular}_key  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS connect_rural.{table_name} (
+    {table_singular}_key  UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     community_key         UUID NOT NULL,
     name                  VARCHAR(200) NOT NULL,
     description           TEXT NULL,
@@ -28,10 +28,10 @@ CREATE TABLE IF NOT EXISTS {table_name} (
     updated_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_{table_name}_communities FOREIGN KEY (community_key)
-        REFERENCES communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES connect_rural.communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_{table_name}_community_key ON {table_name}(community_key);
+CREATE INDEX IF NOT EXISTS idx_{table_name}_community_key ON connect_rural.{table_name}(community_key);
 ```
 
 ## New table (top-level, no community FK)
@@ -39,9 +39,10 @@ CREATE INDEX IF NOT EXISTS idx_{table_name}_community_key ON {table_name}(commun
 ```sql
 -- changeset israel-CR:{DDMMYY}-001
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;  -- only if not already present
+CREATE SCHEMA IF NOT EXISTS connect_rural;                 -- only in the first changeset
 
-CREATE TABLE IF NOT EXISTS {table_name} (
-    {table_singular}_key  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS connect_rural.{table_name} (
+    {table_singular}_key  UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     name                  VARCHAR(200) NOT NULL,
     active                BOOLEAN DEFAULT TRUE,
     created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -53,29 +54,29 @@ CREATE TABLE IF NOT EXISTS {table_name} (
 
 ```sql
 -- changeset israel-CR:{DDMMYY}-001
-CREATE TABLE IF NOT EXISTS {table_a}_{table_b} (
-    {table_a}_{table_b}_key  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS connect_rural.{table_a}_{table_b} (
+    {table_a}_{table_b}_key  UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     {table_a_singular}_key   UUID NOT NULL,
     {table_b_singular}_key   UUID NOT NULL,
     created_at               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_{table_a}_{table_b}_{table_a} FOREIGN KEY ({table_a_singular}_key)
-        REFERENCES {table_a}({table_a_singular}_key) ON DELETE CASCADE ON UPDATE CASCADE,
+        REFERENCES connect_rural.{table_a}({table_a_singular}_key) ON DELETE CASCADE ON UPDATE CASCADE,
 
     CONSTRAINT fk_{table_a}_{table_b}_{table_b} FOREIGN KEY ({table_b_singular}_key)
-        REFERENCES {table_b}({table_b_singular}_key) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES connect_rural.{table_b}({table_b_singular}_key) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_{table_a}_{table_b}_{table_a_singular}_key ON {table_a}_{table_b}({table_a_singular}_key);
-CREATE INDEX IF NOT EXISTS idx_{table_a}_{table_b}_{table_b_singular}_key ON {table_a}_{table_b}({table_b_singular}_key);
+CREATE INDEX IF NOT EXISTS idx_{table_a}_{table_b}_{table_a_singular}_key ON connect_rural.{table_a}_{table_b}({table_a_singular}_key);
+CREATE INDEX IF NOT EXISTS idx_{table_a}_{table_b}_{table_b_singular}_key ON connect_rural.{table_a}_{table_b}({table_b_singular}_key);
 ```
 
 ## Add column to existing table
 
 ```sql
 -- changeset israel-CR:{DDMMYY}-001
-ALTER TABLE {table_name}
+ALTER TABLE connect_rural.{table_name}
     ADD COLUMN IF NOT EXISTS {column_name} {TYPE} {NULL|NOT NULL} {DEFAULT ...};
 ```
 
@@ -83,7 +84,7 @@ ALTER TABLE {table_name}
 
 ```sql
 -- changeset israel-CR:{DDMMYY}-001
-CREATE INDEX IF NOT EXISTS idx_{table_name}_{column_name} ON {table_name}({column_name});
+CREATE INDEX IF NOT EXISTS idx_{table_name}_{column_name} ON connect_rural.{table_name}({column_name});
 ```
 
 ---

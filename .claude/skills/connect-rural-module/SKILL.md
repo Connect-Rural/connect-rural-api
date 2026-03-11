@@ -25,7 +25,7 @@ Read `references/templates.md` for complete code templates for each file.
 ### Step 2: Create Data layer
 
 1. **Entity** (`data/{module}/{Module}Entity.java`):
-   - `@Entity @Table(name = "{table_name}")`
+   - `@Entity @Table(name = "{table_name}", schema = "connect_rural")` — always include `schema = "connect_rural"`
    - `@Data @NoArgsConstructor @AllArgsConstructor` (Lombok)
    - UUID PK with `@GeneratedValue(strategy = GenerationType.UUID)`, column named `{module}_key`
    - Timestamps: `created_at` (`updatable = false`) and `updated_at`
@@ -34,7 +34,8 @@ Read `references/templates.md` for complete code templates for each file.
    - Extends `JpaRepository<{Module}Entity, UUID>` + `JpaSpecificationExecutor<{Module}Entity>`
 
 3. **Migration SQL** (`resources/db/changelog/scripts/{version}.sql`):
-   - Add the new changeset to `db.changelog-master.xml`
+   - All DDL must be schema-qualified: `connect_rural.{table_name}`. See connect-rural-migration skill.
+   - The master changelog uses `<includeAll>` — no need to edit `db.changelog-master.xml`
 
 ### Step 3: Create Business layer
 
@@ -79,9 +80,11 @@ Read `references/templates.md` for complete code templates for each file.
 ## Key Conventions
 
 - All primary keys are `UUID`, exposed as `String` in DTOs (`key.toString()`)
+- All entities declare `schema = "connect_rural"` in `@Table`; JPA `hibernate.default_schema=connect_rural` is also set as fallback
 - `active` boolean for soft deletes where applicable
 - Use `@Valid` on `@RequestBody` params; validation errors handled globally
 - Mappers never throw; return `null` if input is `null`
 - Use `@AllArgsConstructor` (not `@RequiredArgsConstructor`) on use cases since all fields are final
+- Test profile (`application-test.properties`) uses H2 in `MODE=PostgreSQL` with `INIT` to create the `connect_rural` schema on startup; Liquibase disabled
 
 See `references/templates.md` for copy-paste code templates for all files.

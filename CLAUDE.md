@@ -22,6 +22,8 @@ docker-compose up --build   # Build and start container
 
 Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance. Also `WHATSAPP_GATEWAY_URL` (URL del gateway, default `http://localhost:8081`) y `APP_BASE_URL` (URL pública de este servicio, default `http://localhost:8080`) para la integración WhatsApp. El `appKey` por comunidad se almacena en `community.whatsappAppKey` en BD — no hay una variable global de tenant.
 
+Current local DB target is `cr-development`; application tables run under schema `connect_rural`. UUID defaults must use `public.uuid_generate_v4()` (schema-qualified).
+
 Tests use an H2 in-memory database with profile `test` (see `src/test/resources/application-test.properties`).
 
 ## Project Structure
@@ -152,6 +154,8 @@ Cada **comunidad** puede ser un tenant independiente en el `whatsapp-gateway` (u
 ### Database Migrations
 
 Schema changes go in `src/main/resources/db/changelog/scripts/` as SQL files and must be referenced in `db.changelog-master.xml`. Liquibase is disabled in the test profile; H2 auto-creates the schema via `ddl-auto=create-drop`.
+
+Schema migration note: base scripts (`0.0.1.sql` and `0.0.2.sql`) create/use `connect_rural` directly and enforce `public.uuid_generate_v4()` defaults for UUID primary keys.
 
 ### Key Conventions
 

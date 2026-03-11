@@ -54,11 +54,18 @@ One changeset per table creation. Group related `CREATE INDEX` statements in the
 ### Step 4: Apply conventions
 
 See `references/patterns.md` for:
-- UUID primary key setup (`uuid_generate_v4()`)
+- All tables must be **schema-qualified**: `connect_rural.{table_name}` — never bare table names
+- UUID primary key default: `public.uuid_generate_v4()` — always schema-qualified
 - FK constraint naming: `fk_{child_table}_{parent_table}`
+- FK references must also be schema-qualified: `REFERENCES connect_rural.{parent_table}(...)`
 - Index naming: `idx_{table}_{column}`
 - Standard column types and defaults
+- First changeset in a new file that creates tables from scratch must include:
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;
+  CREATE SCHEMA IF NOT EXISTS connect_rural;
+  ```
 
 ### Step 5: Verify
 
-Run the app (`mvn spring-boot:run`) and confirm Liquibase applies the changeset without errors. The test profile disables Liquibase, so verify against the local PostgreSQL instance.
+Run the app (`mvn spring-boot:run`) and confirm Liquibase applies the changeset without errors. The local target database is `cr-development`; application tables run under schema `connect_rural`. The test profile disables Liquibase, so verify against the local PostgreSQL instance.

@@ -2,10 +2,11 @@
 
 -- changeset israel-CR:261125-001
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;
+CREATE SCHEMA IF NOT EXISTS connect_rural;
 
 
-CREATE TABLE IF NOT EXISTS communities (
-    community_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS connect_rural.communities (
+    community_key UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     name VARCHAR(200) NOT NULL,
     description TEXT NULL,
     logo_url VARCHAR(500) NULL,
@@ -21,8 +22,8 @@ CREATE TABLE IF NOT EXISTS communities (
 );
 
 -- changeset israel-CR:031225-001
-CREATE TABLE IF NOT EXISTS residents(
-    resident_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS connect_rural.residents(
+    resident_key UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     community_key UUID NOT NULL,
     first_name VARCHAR(200) NOT NULL,
     last_name VARCHAR(200) NULL,
@@ -37,8 +38,8 @@ CREATE TABLE IF NOT EXISTS residents(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_resident_community FOREIGN KEY(community_key)
-     REFERENCES communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
+     REFERENCES connect_rural.communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE
 
 );
 
-CREATE INDEX IF NOT EXISTS idx_resident_community_key ON residents(community_key);
+CREATE INDEX IF NOT EXISTS idx_resident_community_key ON connect_rural.residents(community_key);

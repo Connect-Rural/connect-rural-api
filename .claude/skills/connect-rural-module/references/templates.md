@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "{table_name}")
+@Table(name = "{table_name}", schema = "connect_rural")
 public class {Module}Entity {
 
     @Id
