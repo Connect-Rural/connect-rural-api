@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -49,11 +51,27 @@ public class CooperationService {
     }
 
     public void delete(String cooperationKey){
-
         cooperationRepository.deleteById(UUID.fromString(cooperationKey));
-
     }
 
+    public CooperationEntity reopen(CooperationEntity entity) {
+        if (!"CLOSED".equals(entity.getStatus())) {
+            throw new IllegalStateException("Cooperation is not closed");
+        }
+        entity.setStatus("OPEN");
+        entity.setClosedAt(null);
+        entity.setUpdatedAt(LocalDateTime.now());
+        return cooperationRepository.save(entity);
+    }
 
+    public CooperationEntity close(CooperationEntity entity) {
+        if ("CLOSED".equals(entity.getStatus())) {
+            throw new IllegalStateException("Cooperation is already closed");
+        }
+        entity.setStatus("CLOSED");
+        entity.setClosedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+        return cooperationRepository.save(entity);
+    }
 
 }

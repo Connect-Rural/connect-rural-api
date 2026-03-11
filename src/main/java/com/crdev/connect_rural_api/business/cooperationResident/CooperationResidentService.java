@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +65,50 @@ public class CooperationResidentService {
         return cooperationResidentRepository.findByCooperationKey(fromString(cooperationKey));
     }
 
+    public CooperationResidentEntity getByCooperationAndResident(String cooperationKey, String residentKey) {
+        return cooperationResidentRepository
+                .findByCooperationKeyAndResidentKey(fromString(cooperationKey), fromString(residentKey))
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+    }
 
+    @Transactional
+    public CooperationResidentEntity markAsPaid(String cooperationKey, String residentKey,
+                                                BigDecimal amountPaid, LocalDate paidAt) {
+        CooperationResidentEntity assignment = getByCooperationAndResident(cooperationKey, residentKey);
+        assignment.setIsPaid(true);
+        assignment.setAmountPaid(amountPaid);
+        assignment.setPaidAt(paidAt != null ? paidAt : LocalDate.now());
+        assignment.setUpdatedAt(LocalDateTime.now());
+        return cooperationResidentRepository.save(assignment);
+    }
 
+    @Transactional
+    public CooperationResidentEntity markAsUnpaid(String cooperationKey, String residentKey) {
+        CooperationResidentEntity assignment = getByCooperationAndResident(cooperationKey, residentKey);
+        assignment.setIsPaid(false);
+        assignment.setAmountPaid(null);
+        assignment.setPaidAt(null);
+        assignment.setUpdatedAt(LocalDateTime.now());
+        return cooperationResidentRepository.save(assignment);
+    }
+
+    @Transactional
+    public int markAllAsPaid(String cooperationKey, BigDecimal defaultAmount) {
+        List<CooperationResidentEntity> pending = cooperationResidentRepository
+                .findByCooperationKey(fromString(cooperationKey))
+                .stream()
+                .filter(a -> !Boolean.TRUE.equals(a.getIsPaid()))
+                .toList();
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        pending.forEach(a -> {
+            a.setIsPaid(true);
+            a.setAmountPaid(defaultAmount);
+            a.setPaidAt(today);
+            a.setUpdatedAt(now);
+        });
+        cooperationResidentRepository.saveAll(pending);
+        return pending.size();
+    }
 }

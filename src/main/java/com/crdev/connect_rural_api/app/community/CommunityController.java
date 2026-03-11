@@ -11,6 +11,7 @@ import com.crdev.connect_rural_api.business.whatsapp.usecases.RegisterCommunityT
 import com.crdev.connect_rural_api.business.whatsapp.usecases.UnlinkCommunityTenantUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/communities")
 @RequiredArgsConstructor
+@Slf4j
 public class CommunityController {
     private final GetCommunityListUseCase communityListUseCase;
     private final GetCommunityPaginatedUseCase communityPaginatedUseCase;
@@ -33,6 +35,7 @@ public class CommunityController {
 
     @PostMapping
     public ResponseEntity<CommunityResponseDto> create(@Valid @RequestBody CreateCommunityDto request) {
+        log.info("Community create requested: name={}", request.getName());
         return ResponseEntity.status(201).body(
                 createCommunityUseCase.execute(request)
         );
@@ -63,11 +66,13 @@ public class CommunityController {
 
     @PatchMapping("/{key}")
     public ResponseEntity<CommunityAdminResponseDto> updateCommunity(@PathVariable String key, @Valid @RequestBody CreateCommunityDto updateRequest) {
+        log.info("Community update requested: key={}", key);
         return ResponseEntity.ok(updateCommunityUC.execute(key, updateRequest));
     }
 
     @DeleteMapping("/{key}")
     public ResponseEntity<?> deleteCommunity(@PathVariable String key) {
+        log.info("Community delete requested: key={}", key);
         deleteCommunityUC.execute(key);
         return ResponseEntity.noContent().build();
     }
@@ -80,6 +85,7 @@ public class CommunityController {
     public ResponseEntity<Map<String, UUID>> registerWhatsapp(
             @PathVariable String key,
             @Valid @RequestBody RegisterWhatsappTenantDto request) {
+        log.info("Whatsapp tenant register requested: communityKey={}", key);
         UUID appKey = registerCommunityTenantUC.execute(key, request);
         return ResponseEntity.status(201).body(Map.of("appKey", appKey));
     }
@@ -89,6 +95,7 @@ public class CommunityController {
      */
     @DeleteMapping("/{key}/whatsapp")
     public ResponseEntity<Void> unlinkWhatsapp(@PathVariable String key) {
+        log.info("Whatsapp tenant unlink requested: communityKey={}", key);
         unlinkCommunityTenantUC.execute(key);
         return ResponseEntity.noContent().build();
     }

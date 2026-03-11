@@ -10,6 +10,7 @@ import com.crdev.connect_rural_api.business.resident.ResidentService;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import static java.util.UUID.fromString;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class CreateCooperationUseCase {
     private final CooperationService service;
     private final CooperationResidentService cooperationResidentService;
@@ -29,6 +31,7 @@ public class CreateCooperationUseCase {
 
     @Transactional
     public CooperationSummaryResponseDto execute(String communityKey, CreateCooperationRequestDto dto){
+        log.info("Creating cooperation: communityKey={}, name={}", communityKey, dto.getName());
         var cooperationEntity = new CooperationEntity(
                 null,
                 fromString(communityKey),
@@ -43,7 +46,8 @@ public class CreateCooperationUseCase {
                 dto.getAssignmentType().toString(),
                 dto.getStatus(),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null    // closedAt
         );
 
         CooperationEntity cooperationCreated = service.create(cooperationEntity);

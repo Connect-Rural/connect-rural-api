@@ -43,5 +43,7 @@ public class CooperationEntity {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @Column(name = "closed_at")
+    private LocalDateTime closedAt;
 
 }

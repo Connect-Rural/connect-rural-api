@@ -6,17 +6,20 @@ import com.crdev.connect_rural_api.business.resident.ResidentService;
 import com.crdev.connect_rural_api.business.resident.mapper.ResidentAppMapper;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class CreateResidentUseCase {
     private final ResidentService service;
     private final ResidentAppMapper mapper;
 
     public ResidentResponseDto execute(String communityKey, CreateResidentDto dto){
+        log.info("Creating resident: communityKey={}", communityKey);
         var residentEntity = new ResidentEntity(
                 null,
                 UUID.fromString(communityKey),

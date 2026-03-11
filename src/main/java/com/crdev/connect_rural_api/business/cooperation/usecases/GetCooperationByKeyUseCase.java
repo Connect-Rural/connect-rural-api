@@ -1,6 +1,5 @@
 package com.crdev.connect_rural_api.business.cooperation.usecases;
 
-
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationResponseDto;
 import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import com.crdev.connect_rural_api.business.cooperation.mapper.CooperationAppMapper;
@@ -17,45 +16,35 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class GetCooperationByKeyUseCase {
-    private final CooperationService service;
+	private final CooperationService service;
 
-    private final CooperationResidentService cooperationResidentService;
-    private final ResidentService residentService;
-    private final CooperationAppMapper mapper;
+	private final CooperationResidentService cooperationResidentService;
+	private final ResidentService residentService;
+	private final CooperationAppMapper mapper;
 
-    @Transactional
-    public CooperationResponseDto execute(String communityKey, String cooperationKey){
-        var cooperationEntity = service.getByKey(communityKey,cooperationKey);
+	@Transactional
+	public CooperationResponseDto execute(String communityKey, String cooperationKey) {
+		var cooperationEntity = service.getByKey(communityKey, cooperationKey);
 
-        List<String> assignedResidentsKeys = new ArrayList<>();
-        List<String> excludedResidentsKeys = new ArrayList<>();
+		List<String> assignedResidentsKeys = new ArrayList<>();
+		List<String> excludedResidentsKeys = new ArrayList<>();
 
-        var assignedResidents = cooperationResidentService.listByCooperation(cooperationKey);
+		var assignedResidents = cooperationResidentService.listByCooperation(cooperationKey);
 
-         if(cooperationEntity.getAssignmentType().equals("ALL_EXCEPT")){
+		if (cooperationEntity.getAssignmentType().equals("ALL_EXCEPT")) {
 
-             List<ResidentEntity> residentsInCommunity = residentService.listByCommunity(
-                     communityKey
-             );
+			List<ResidentEntity> residentsInCommunity = residentService.listByCommunity(communityKey);
 
-            excludedResidentsKeys = residentsInCommunity.stream()
-                     .filter(resident -> assignedResidents.stream()
-                             .noneMatch(assignedResident -> assignedResident.getResidentKey().equals(resident.getKey()))
-                     )
-                     .map(resident -> resident.getKey().toString())
-                     .toList();
-        }
-        else if(cooperationEntity.getAssignmentType().equals("INDIVIDUAL")){
-            assignedResidentsKeys = assignedResidents.stream()
-                    .map(assignedResident -> assignedResident.getResidentKey().toString())
-                    .toList();
-        }
+			excludedResidentsKeys = residentsInCommunity.stream()
+					.filter(resident -> assignedResidents.stream()
+							.noneMatch(assignedResident -> assignedResident.getResidentKey().equals(resident.getKey())))
+					.map(resident -> resident.getKey().toString()).toList();
+		} else if (cooperationEntity.getAssignmentType().equals("INDIVIDUAL")) {
+			assignedResidentsKeys = assignedResidents.stream()
+					.map(assignedResident -> assignedResident.getResidentKey().toString()).toList();
+		}
 
+		return mapper.toResponseDto(cooperationEntity, assignedResidentsKeys, excludedResidentsKeys);
 
-        return mapper.toResponseDto(cooperationEntity,
-                assignedResidentsKeys,
-                 excludedResidentsKeys
-                );
-
-    }
+	}
 }

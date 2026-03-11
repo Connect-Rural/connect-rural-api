@@ -121,7 +121,7 @@ All domain modules follow the same internal structure under both `app/` and `bus
 - **community** – Top-level entity. Routes: `/api/communities`
 - **resident** – Scoped to a community. Routes: `/api/{communityKey}/residents`
 - **cooperation** – Payment collection system scoped to a community. Routes: `/api/{communityKey}/cooperations`
-- **cooperationResident** – Junction table tracking resident ↔ cooperation assignments and payment status. Managed only via `CooperationResidentService`; no dedicated controller.
+- **cooperationResident** – Junction table tracking resident ↔ cooperation assignments and payment status. Managed only via `CooperationResidentService`; no dedicated controller. Payment endpoints live under `/api/{communityKey}/cooperations/{cooperationKey}/residents/`.
 - **whatsapp** – Integración con `whatsapp-gateway`. Recibe eventos normalizados en `POST /api/whatsapp/events` y envía mensajes vía `WhatsappGatewayService`. No tiene capa `data/` propia.
 
 ### WhatsApp Gateway Integration
@@ -157,6 +157,28 @@ Schema changes go in `src/main/resources/db/changelog/scripts/` as SQL files and
 
 Schema migration note: base scripts (`0.0.1.sql` and `0.0.2.sql`) create/use `connect_rural` directly and enforce `public.uuid_generate_v4()` defaults for UUID primary keys.
 
+### Cooperation Payment Flow
+
+`GET /{cooperationKey}/detail` returns `CooperationDetailResponseDto` with a `List<ResidentAssigned>`. Each `ResidentAssigned` includes computed fields:
+- `residentName` (firstName + lastName), `residentType` (from `cooperation.assignmentType`)
+- `paymentStatus`: `PAGADO` | `VENCIDO` (unpaid & past dueDate) | `PENDIENTE`
+- `baseAmount`, `lateFeeAmount` (applied only when `VENCIDO`), `totalAmount`
+- `amountPaid`, `paidAt` from `cooperation_residents`
+
+Payment use cases in `business/cooperation/usecases/`:
+- `MarkAsPaidUseCase` — `PATCH /{cooperationKey}/residents/{residentKey}/pay` — body: `{ paidAt?, amountPaid? }` (both optional; defaults to today / baseAmount)
+- `MarkAsUnpaidUseCase` — `PATCH /{cooperationKey}/residents/{residentKey}/unpay`
+- `MarkAllAsPaidUseCase` — `PATCH /{cooperationKey}/residents/pay-all` — returns `{ updated: N }`
+
+`CooperationResidentService` owns all payment mutation logic. `ResidentService.getByKeys(Collection<UUID>)` batch-loads residents in one query (avoids N+1).
+
+### Cooperation Status Flow
+
+Cooperations have a `status` field with two values: `OPEN` (default on creation) and `CLOSED`.
+
+- `CloseCooperationUseCase` — `PATCH /api/{communityKey}/cooperations/{cooperationKey}/close` — sets `status=CLOSED`; irreversible (throws `IllegalStateException` if already `CLOSED`).
+- A `closedAt` timestamp is recorded on the `cooperations` table, added via migration `0.0.3.sql` (changeset `israel-CR:100326-001`).
+
 ### Key Conventions
 
 - UUID primary keys on all entities (e.g., `community_key`, `resident_key`).
@@ -165,3 +187,4 @@ Schema migration note: base scripts (`0.0.1.sql` and `0.0.2.sql`) create/use `co
 - Mappers (`*AppMapper.java`) in `business/<module>/mapper/` handle all entity ↔ DTO conversion — never map inside controllers or use cases directly.
 - Validation errors return structured responses via `GlobalExceptionHandler` using `MethodArgumentNotValidException` and `ConstraintViolationException`.
 - CORS is configured in `CorsConfig.java` to allow `localhost:4200` (Angular frontend).
+- All SQL migrations use schema-qualified table names (`connect_rural.<table>`) and `public.uuid_generate_v4()` for UUID defaults. Unqualified references without `connect_rural.` will break in production.

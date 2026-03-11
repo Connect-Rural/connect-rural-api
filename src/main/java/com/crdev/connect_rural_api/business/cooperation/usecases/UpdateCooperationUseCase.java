@@ -13,6 +13,7 @@ import com.crdev.connect_rural_api.business.resident.mapper.ResidentAppMapper;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class UpdateCooperationUseCase {
     private final CooperationService service;
     private final CooperationResidentService cooperationResidentService;
@@ -28,6 +30,7 @@ public class UpdateCooperationUseCase {
 
     @Transactional
     public CooperationSummaryResponseDto execute(String communityKey, String cooperationKey, CreateCooperationRequestDto dto) {
+        log.info("Updating cooperation: communityKey={}, cooperationKey={}", communityKey, cooperationKey);
         CooperationEntity existing = service.getByKey(communityKey, cooperationKey);
         mapper.updateEntityFromDto(dto, existing);
 

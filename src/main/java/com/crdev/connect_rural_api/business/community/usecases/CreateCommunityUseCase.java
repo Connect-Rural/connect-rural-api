@@ -6,15 +6,18 @@ import com.crdev.connect_rural_api.business.community.CommunityService;
 import com.crdev.connect_rural_api.business.community.mapper.CommunityAppMapper;
 import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class CreateCommunityUseCase {
     private final CommunityService service;
     private final CommunityAppMapper mapper;
 
     public CommunityResponseDto execute(CreateCommunityDto dto) {
+        log.info("Creating community: name={}", dto.getName());
         var communityEntity = new CommunityEntity(
                 null,
                 dto.getName(),

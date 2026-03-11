@@ -9,6 +9,7 @@ import com.crdev.connect_rural_api.app.resident.dto.response.SimpleResidentRespo
 import com.crdev.connect_rural_api.business.resident.usecases.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/{communityKey}/residents")
 @RequiredArgsConstructor
+@Slf4j
 public class ResidentController {
     private final GetResidentListByCommunityKeyUseCase getResidentListByCommunityKeyUC;
     private final GetResidentPaginatedUseCase getResidentPaginatedUC;
@@ -57,6 +59,7 @@ public class ResidentController {
     @PostMapping
     public ResponseEntity<ResidentResponseDto> create(  @PathVariable String communityKey,
                                                         @Valid @RequestBody CreateResidentDto request) {
+        log.info("Resident create requested: communityKey={}", communityKey);
         return ResponseEntity.status(201).body(
                 createResidentUC.execute(communityKey,request)
         );
@@ -66,12 +69,14 @@ public class ResidentController {
     public ResponseEntity<ResidentResponseDto> update(@PathVariable String communityKey,
                                                       @PathVariable String residentKey,
                                                       @Valid @RequestBody CreateResidentDto updateRequest) {
+        log.info("Resident update requested: communityKey={}, residentKey={}", communityKey, residentKey);
         return ResponseEntity.ok(updateResidentUC.execute(communityKey,residentKey, updateRequest));
     }
 
     @DeleteMapping("/{residentKey}")
     public ResponseEntity<?> delete(@PathVariable String communityKey,
                                     @PathVariable String residentKey) {
+        log.info("Resident delete requested: communityKey={}, residentKey={}", communityKey, residentKey);
         deleteResidentUC.execute(communityKey, residentKey);
         return ResponseEntity.noContent().build();
     }
