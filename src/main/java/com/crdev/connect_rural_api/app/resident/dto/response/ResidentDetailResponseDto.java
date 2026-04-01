@@ -20,4 +20,5 @@ public class ResidentDetailResponseDto {
     private String address;
     private String addressReference;
     private LocalDate joinedAt;
+    private  Boolean active;
 }

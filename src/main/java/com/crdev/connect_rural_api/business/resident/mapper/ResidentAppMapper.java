@@ -50,7 +50,8 @@ public class ResidentAppMapper {
                 entity.getEmail(),
                 entity.getAddress(),
                 entity.getAddressReference(),
-                entity.getJoinedAt()
+                entity.getJoinedAt(),
+                entity.getActive()
         );
     }
 

@@ -53,8 +53,7 @@ public class CommunityAppMapper {
                 "",
                 1,
                 2,
-                entity.getActive(),
-                entity.getWhatsappAppKey()
+                entity.getActive()
         );
     }
 

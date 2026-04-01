@@ -3,17 +3,21 @@ package com.crdev.connect_rural_api.business.cooperation.usecases;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.ResidentAssigned;
 import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import com.crdev.connect_rural_api.business.cooperation.LateFeeCalculator;
-import com.crdev.connect_rural_api.business.cooperationResident.CooperationResidentService;
+import com.crdev.connect_rural_api.business.financialObligation.FinancialObligationService;
 import com.crdev.connect_rural_api.business.resident.ResidentService;
+import com.crdev.connect_rural_api.business.residentPayment.ResidentPaymentService;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
-import com.crdev.connect_rural_api.data.cooperationResident.CooperationResidentEntity;
+import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
+import com.crdev.connect_rural_api.data.residentPayment.ResidentPaymentEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -21,49 +25,43 @@ import java.time.LocalDate;
 public class MarkAsPaidUseCase {
 
     private final CooperationService cooperationService;
-    private final CooperationResidentService cooperationResidentService;
+    private final FinancialObligationService financialObligationService;
+    private final ResidentPaymentService residentPaymentService;
     private final ResidentService residentService;
     private final LateFeeCalculator lateFeeCalculator;
 
-    /**
-     * Marca el pago de un residente y devuelve el ResidentAssigned actualizado.
-     *
-     * - paidAt: fecha efectiva del pago. Si es null se usa hoy.
-     * - amountPaid: si no se provee, se calcula como baseAmount + recargo acumulado
-     *   hasta effectivePaidAt (según lateFeePeriod y dueDate de la cooperación).
-     * - Una vez pagado, lateFeeAmount y totalAmount se devuelven como 0 / baseAmount
-     *   porque el recargo ya está absorbido en amountPaid.
-     */
+    @Transactional
     public ResidentAssigned execute(String communityKey, String cooperationKey,
                                     String residentKey, BigDecimal amountPaid, LocalDate paidAt) {
 
         CooperationEntity cooperation = cooperationService.getByKey(communityKey, cooperationKey);
         LocalDate effectivePaidAt = paidAt != null ? paidAt : LocalDate.now();
 
-        BigDecimal amount;
-        if (amountPaid != null) {
-            amount = amountPaid;
-        } else {
-            BigDecimal lateFee = lateFeeCalculator.calculate(cooperation, effectivePaidAt);
-            amount = cooperation.getBaseAmount().add(lateFee);
-        }
+        BigDecimal lateFee = lateFeeCalculator.calculate(cooperation, effectivePaidAt);
+        BigDecimal amount = amountPaid != null ? amountPaid : cooperation.getBaseAmount().add(lateFee);
+
+        FinancialObligationEntity obligation = financialObligationService.getByCooperationAndResident(
+                UUID.fromString(cooperationKey), UUID.fromString(residentKey));
 
         log.info("Marking as paid: cooperationKey={}, residentKey={}, paidAt={}, amount={}",
                 cooperationKey, residentKey, effectivePaidAt, amount);
-        CooperationResidentEntity assignment =
-                cooperationResidentService.markAsPaid(cooperationKey, residentKey, amount, effectivePaidAt);
+
+        ResidentPaymentEntity payment = residentPaymentService.createPaymentForObligation(
+                UUID.fromString(residentKey), amount, effectivePaidAt, obligation.getKey());
+
+        financialObligationService.markAsPaid(obligation.getKey(), lateFee);
 
         ResidentEntity resident = residentService.getByKey(communityKey, residentKey);
         String fullName = resident.getFirstName()
                 + (resident.getLastName() != null ? " " + resident.getLastName() : "");
 
-        // Tooltip: mora efectivamente incluida en lo que pagó
         BigDecimal baseAmount = cooperation.getBaseAmount();
         BigDecimal lateFeeAmountPaid = null;
         Long lateFeePeriodsCount = null;
-        if (assignment.getAmountPaid() != null && assignment.getAmountPaid().compareTo(baseAmount) > 0) {
-            lateFeeAmountPaid = assignment.getAmountPaid().subtract(baseAmount);
+        if (payment.getAmount().compareTo(baseAmount) > 0) {
+            lateFeeAmountPaid = payment.getAmount().subtract(baseAmount);
             lateFeePeriodsCount = lateFeeCalculator.calculatePeriods(cooperation, effectivePaidAt);
+            if (lateFeePeriodsCount == 0) lateFeePeriodsCount = null;
         }
 
         return new ResidentAssigned(
@@ -74,11 +72,11 @@ public class MarkAsPaidUseCase {
                 cooperation.getAssignmentType(),
                 resident.getPhoneNumber(),
                 true,
-                assignment.getAmountPaid(),
-                assignment.getPaidAt(),
+                payment.getAmount(),
+                payment.getPaidAt(),
                 baseAmount,
-                BigDecimal.ZERO,    // lateFeeAmount → 0 (absorbido en amountPaid)
-                baseAmount,         // totalAmount → baseAmount (referencia base)
+                BigDecimal.ZERO,
+                baseAmount,
                 "PAGADO",
                 lateFeeAmountPaid,
                 lateFeePeriodsCount

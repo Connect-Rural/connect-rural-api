@@ -1,0 +1,96 @@
+-- liquibase formatted sql
+
+-- ============================================================
+-- changeset israel-CR:071225-002
+-- fines (catálogo de multas por comunidad)
+-- V2 — descomentar cuando se implemente el módulo de multas
+-- ============================================================
+-- CREATE TABLE IF NOT EXISTS connect_rural.fines (
+--     fine_key            UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+--     community_key       UUID NOT NULL,
+--     name                VARCHAR(150) NOT NULL,
+--     description         TEXT NULL,
+--     default_amount      DECIMAL(12,2) NOT NULL,
+--     reason_type         VARCHAR(100) NULL,
+--     active              BOOLEAN NOT NULL DEFAULT TRUE,
+--     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_fine_community FOREIGN KEY (community_key)
+--         REFERENCES connect_rural.communities(community_key)
+--         ON DELETE CASCADE ON UPDATE CASCADE
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_fine_community ON connect_rural.fines(community_key);
+
+
+-- ============================================================
+-- changeset israel-CR:071225-003
+-- community_works (catálogo de trabajos comunitarios)
+-- V2 — descomentar cuando se implemente el módulo de trabajos
+-- ============================================================
+-- CREATE TABLE IF NOT EXISTS connect_rural.community_works (
+--     work_key            UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+--     community_key       UUID NOT NULL,
+--     name                VARCHAR(150) NOT NULL,
+--     description         TEXT NULL,
+--     equivalent_amount   DECIMAL(12,2) NOT NULL,
+--     active              BOOLEAN NOT NULL DEFAULT TRUE,
+--     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_work_community FOREIGN KEY (community_key)
+--         REFERENCES connect_rural.communities(community_key)
+--         ON DELETE CASCADE ON UPDATE CASCADE
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_work_community ON connect_rural.community_works(community_key);
+
+
+
+-- ============================================================
+-- changeset israel-CR:201225-004
+-- work_assignments (asignaciones de trabajo comunitario)
+-- V2 — descomentar junto con community_works
+-- ============================================================
+-- CREATE TABLE IF NOT EXISTS connect_rural.work_assignments (
+--     assignment_key  UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+--     resident_key    UUID NOT NULL,
+--     community_key   UUID NOT NULL,
+--     work_key        UUID NOT NULL,
+--     status          VARCHAR(50) NOT NULL DEFAULT 'PENDING', -- PENDING | COMPLETED | CANCELLED
+--     scheduled_date  DATE NULL,
+--     completed_at    TIMESTAMP NULL,
+--     approved_by     UUID NULL,
+--     notes           TEXT NULL,
+--     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_wassign_resident  FOREIGN KEY (resident_key)
+--         REFERENCES connect_rural.residents(resident_key)  ON DELETE CASCADE ON UPDATE CASCADE,
+--     CONSTRAINT fk_wassign_community FOREIGN KEY (community_key)
+--         REFERENCES connect_rural.communities(community_key) ON DELETE CASCADE ON UPDATE CASCADE,
+--     CONSTRAINT fk_wassign_work      FOREIGN KEY (work_key)
+--         REFERENCES connect_rural.community_works(work_key) ON DELETE RESTRICT ON UPDATE CASCADE,
+--     CONSTRAINT chk_wassign_status
+--         CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED'))
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_wassign_resident  ON connect_rural.work_assignments(resident_key);
+-- CREATE INDEX IF NOT EXISTS idx_wassign_community ON connect_rural.work_assignments(community_key);
+
+
+-- ============================================================
+-- changeset israel-CR:201225-005
+-- work_settlements (trabajo aplicado como abono a una deuda)
+-- V2 — descomentar junto con work_assignments
+-- ============================================================
+-- CREATE TABLE IF NOT EXISTS connect_rural.work_settlements (
+--     settlement_key      UUID PRIMARY KEY DEFAULT public.uuid_generate_v4(),
+--     obligation_key      UUID NOT NULL,
+--     assignment_key      UUID NOT NULL,
+--     amount_equivalent   DECIMAL(12,2) NOT NULL,
+--     approved_by         UUID NULL,
+--     notes               TEXT NULL,
+--     settled_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_wsettle_obligation FOREIGN KEY (obligation_key)
+--         REFERENCES connect_rural.financial_obligations(obligation_key) ON DELETE RESTRICT ON UPDATE CASCADE,
+--     CONSTRAINT fk_wsettle_assignment FOREIGN KEY (assignment_key)
+--         REFERENCES connect_rural.work_assignments(assignment_key)      ON DELETE RESTRICT ON UPDATE CASCADE
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_wsettle_obligation ON connect_rural.work_settlements(obligation_key);

@@ -5,7 +5,7 @@ import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSumma
 import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import com.crdev.connect_rural_api.business.cooperation.enums.CooperationAssignmentType;
 import com.crdev.connect_rural_api.business.cooperation.mapper.CooperationAppMapper;
-import com.crdev.connect_rural_api.business.cooperationResident.CooperationResidentService;
+import com.crdev.connect_rural_api.business.financialObligation.FinancialObligationService;
 import com.crdev.connect_rural_api.business.resident.ResidentService;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
@@ -14,9 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.UUID.fromString;
 
@@ -25,13 +24,14 @@ import static java.util.UUID.fromString;
 @Slf4j
 public class CreateCooperationUseCase {
     private final CooperationService service;
-    private final CooperationResidentService cooperationResidentService;
+    private final FinancialObligationService financialObligationService;
     private final ResidentService residentService;
     private final CooperationAppMapper mapper;
 
     @Transactional
-    public CooperationSummaryResponseDto execute(String communityKey, CreateCooperationRequestDto dto){
+    public CooperationSummaryResponseDto execute(String communityKey, CreateCooperationRequestDto dto) {
         log.info("Creating cooperation: communityKey={}, name={}", communityKey, dto.getName());
+
         var cooperationEntity = new CooperationEntity(
                 null,
                 fromString(communityKey),
@@ -45,42 +45,48 @@ public class CreateCooperationUseCase {
                 dto.getLateFeePeriodicity(),
                 dto.getAssignmentType().toString(),
                 dto.getStatus(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null    // closedAt
+                null,
+                null,
+                null
         );
 
         CooperationEntity cooperationCreated = service.create(cooperationEntity);
 
-        List<String> assignedResidents = List.of();
+        List<UUID> assignedResidentKeys = resolveAssignedResidents(communityKey, dto);
 
-        if(dto.getAssignmentType() != null && dto.getAssignmentType().equals(CooperationAssignmentType.INDIVIDUAL)){
-           assignedResidents = dto.getAssignedResidentKeys();
-        } else {
-            List<ResidentEntity> residentsInCommunity = residentService.listByCommunity(
-                    communityKey
+        if (!assignedResidentKeys.isEmpty()) {
+            financialObligationService.createForCooperation(
+                    cooperationCreated.getKey(),
+                    fromString(communityKey),
+                    dto.getDueDate(),
+                    dto.getBaseAmount(),
+                    assignedResidentKeys
             );
-
-            if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL)){
-                assignedResidents = residentsInCommunity.stream()
-                        .map(resident -> resident.getKey().toString())
-                        .toList();
-            }
-            else if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL_EXCEPT)){
-                assignedResidents = residentsInCommunity.stream()
-                        .filter(resident -> !dto.getExcludedResidentKeys().contains(resident.getKey().toString()))
-                        .map(resident -> resident.getKey().toString())
-                        .toList();
-            }
-
         }
 
-        cooperationResidentService.assignResidentsToCooperation(
-                cooperationCreated.getKey().toString(),
-                assignedResidents
-        );
-
-
         return mapper.toResponseSummaryDto(cooperationCreated);
+    }
+
+    private List<UUID> resolveAssignedResidents(String communityKey, CreateCooperationRequestDto dto) {
+        CooperationAssignmentType type = dto.getAssignmentType();
+
+        if (type == CooperationAssignmentType.INDIVIDUAL) {
+            return dto.getAssignedResidentKeys().stream().map(UUID::fromString).toList();
+        }
+
+        List<ResidentEntity> allResidents = residentService.listByCommunity(communityKey);
+
+        if (type == CooperationAssignmentType.ALL) {
+            return allResidents.stream().map(ResidentEntity::getKey).toList();
+        }
+
+        if (type == CooperationAssignmentType.ALL_EXCEPT) {
+            return allResidents.stream()
+                    .filter(r -> !dto.getExcludedResidentKeys().contains(r.getKey().toString()))
+                    .map(ResidentEntity::getKey)
+                    .toList();
+        }
+
+        return List.of();
     }
 }

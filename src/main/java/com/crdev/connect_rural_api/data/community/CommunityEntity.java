@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
@@ -40,8 +42,10 @@ public class CommunityEntity {
     private UUID whatsappAppKey;
     @Column(name = "active")
     private Boolean active;
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Date createAt;
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
 }

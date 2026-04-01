@@ -58,7 +58,7 @@ public class CooperationService {
         if (!"CLOSED".equals(entity.getStatus())) {
             throw new IllegalStateException("Cooperation is not closed");
         }
-        entity.setStatus("OPEN");
+        entity.setStatus("ACTIVE");
         entity.setClosedAt(null);
         entity.setUpdatedAt(LocalDateTime.now());
         return cooperationRepository.save(entity);

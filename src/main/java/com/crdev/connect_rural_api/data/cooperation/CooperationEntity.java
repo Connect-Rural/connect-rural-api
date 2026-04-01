@@ -2,6 +2,8 @@ package com.crdev.connect_rural_api.data.cooperation;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "cooperations")
+@Table(name = "cooperations", schema = "connect_rural")
 public class CooperationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,9 +40,11 @@ public class CooperationEntity {
     @Column(name = "assignment_type", length = 20, nullable = false)
     private String assignmentType;
     @Column(length = 20)
-    private String status = "OPEN";
+    private String status = "ACTIVE";
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     @Column(name = "closed_at")

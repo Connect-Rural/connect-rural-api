@@ -1,0 +1,75 @@
+package com.crdev.connect_rural_api.business.residentPayment;
+
+import com.crdev.connect_rural_api.data.paymentAllocation.PaymentAllocationEntity;
+import com.crdev.connect_rural_api.data.paymentAllocation.PaymentAllocationRepository;
+import com.crdev.connect_rural_api.data.residentPayment.ResidentPaymentEntity;
+import com.crdev.connect_rural_api.data.residentPayment.ResidentPaymentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ResidentPaymentService {
+
+    private final ResidentPaymentRepository paymentRepository;
+    private final PaymentAllocationRepository allocationRepository;
+
+    @Transactional
+    public ResidentPaymentEntity createPaymentForObligation(UUID residentKey, BigDecimal amount,
+                                                             LocalDate paidAt, UUID obligationKey) {
+        ResidentPaymentEntity payment = new ResidentPaymentEntity(
+                null, residentKey, amount, null, null, paidAt, null, null
+        );
+        ResidentPaymentEntity saved = paymentRepository.save(payment);
+
+        PaymentAllocationEntity allocation = new PaymentAllocationEntity(
+                null, saved.getKey(), obligationKey, amount, null
+        );
+        allocationRepository.save(allocation);
+
+        return saved;
+    }
+
+    @Transactional
+    public void deletePaymentForObligation(UUID obligationKey) {
+        allocationRepository.findByObligationKey(obligationKey).ifPresent(allocation -> {
+            paymentRepository.deleteById(allocation.getPaymentKey());
+            allocationRepository.delete(allocation);
+        });
+    }
+
+    public Optional<ResidentPaymentEntity> findPaymentForObligation(UUID obligationKey) {
+        return allocationRepository.findByObligationKey(obligationKey)
+                .flatMap(allocation -> paymentRepository.findById(allocation.getPaymentKey()));
+    }
+
+    public Map<UUID, ResidentPaymentEntity> findPaymentsForObligations(Collection<UUID> obligationKeys) {
+        List<PaymentAllocationEntity> allocations = allocationRepository.findByObligationKeyIn(obligationKeys);
+        if (allocations.isEmpty()) return Map.of();
+
+        List<UUID> paymentKeys = allocations.stream()
+                .map(PaymentAllocationEntity::getPaymentKey)
+                .toList();
+
+        Map<UUID, ResidentPaymentEntity> paymentByKey = paymentRepository.findAllByKeyIn(paymentKeys)
+                .stream()
+                .collect(Collectors.toMap(ResidentPaymentEntity::getKey, p -> p));
+
+        return allocations.stream()
+                .filter(a -> paymentByKey.containsKey(a.getPaymentKey()))
+                .collect(Collectors.toMap(
+                        PaymentAllocationEntity::getObligationKey,
+                        a -> paymentByKey.get(a.getPaymentKey())
+                ));
+    }
+}

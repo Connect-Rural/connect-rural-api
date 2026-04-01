@@ -23,5 +23,4 @@ public class CommunityAdminResponseDto {
     private Number membersCount;
     private Number usersCount;
     private Boolean active;
-    private UUID whatsappAppKey;
 }
