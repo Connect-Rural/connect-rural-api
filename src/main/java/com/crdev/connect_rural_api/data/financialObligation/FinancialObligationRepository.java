@@ -15,4 +15,6 @@ public interface FinancialObligationRepository extends JpaRepository<FinancialOb
 
     List<FinancialObligationEntity> findByOriginTypeAndOriginIdAndStatus(
             String originType, UUID originId, String status);
+
+    void deleteByOriginTypeAndOriginId(String originType, UUID originId);
 }

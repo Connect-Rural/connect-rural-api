@@ -66,6 +66,11 @@ public class FinancialObligationService {
     }
 
     @Transactional
+    public void deleteByCooperation(UUID cooperationKey) {
+        repository.deleteByOriginTypeAndOriginId(ORIGIN_COOPERATION, cooperationKey);
+    }
+
+    @Transactional
     public FinancialObligationEntity markAsUnpaid(UUID obligationKey) {
         FinancialObligationEntity obligation = repository.findById(obligationKey)
                 .orElseThrow(() -> new IllegalArgumentException("Obligation not found"));

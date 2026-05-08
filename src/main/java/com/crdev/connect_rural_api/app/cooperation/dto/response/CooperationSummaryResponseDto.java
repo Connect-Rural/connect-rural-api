@@ -1,11 +1,13 @@
 package com.crdev.connect_rural_api.app.cooperation.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +25,7 @@ public class CooperationSummaryResponseDto {
     private int pendingResidents;
     private LocalDate startDate;
     private LocalDate dueDate;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocalDateTime closedAt;
 }
 

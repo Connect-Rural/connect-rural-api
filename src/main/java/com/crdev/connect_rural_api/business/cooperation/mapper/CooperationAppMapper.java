@@ -34,7 +34,8 @@ public class CooperationAppMapper {
                 totalPaid,
                 totalPending,
                 entity.getStartDate(),
-                entity.getDueDate()
+                entity.getDueDate(),
+                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
         );
     }
 
@@ -58,8 +59,8 @@ public class CooperationAppMapper {
                 excludedResidents,
                 entity.getAllowLateFee(),
                 entity.getLateFeeAmount(),
-                entity.getLateFeePeriod()
-
+                entity.getLateFeePeriod(),
+                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
         );
     }
 
@@ -108,7 +109,8 @@ public class CooperationAppMapper {
                 pendingResidents,
                 entity.getAllowLateFee(),
                 entity.getLateFeeAmount(),
-                entity.getLateFeePeriod()
+                entity.getLateFeePeriod(),
+                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
         );
     }
 

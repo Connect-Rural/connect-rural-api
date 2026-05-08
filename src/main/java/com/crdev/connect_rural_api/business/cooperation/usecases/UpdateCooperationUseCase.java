@@ -2,14 +2,11 @@ package com.crdev.connect_rural_api.business.cooperation.usecases;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequestDto;
 import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryResponseDto;
-import com.crdev.connect_rural_api.app.resident.dto.request.CreateResidentDto;
-import com.crdev.connect_rural_api.app.resident.dto.response.ResidentResponseDto;
 import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import com.crdev.connect_rural_api.business.cooperation.enums.CooperationAssignmentType;
 import com.crdev.connect_rural_api.business.cooperation.mapper.CooperationAppMapper;
-import com.crdev.connect_rural_api.business.cooperationResident.CooperationResidentService;
+import com.crdev.connect_rural_api.business.financialObligation.FinancialObligationService;
 import com.crdev.connect_rural_api.business.resident.ResidentService;
-import com.crdev.connect_rural_api.business.resident.mapper.ResidentAppMapper;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import lombok.AllArgsConstructor;
@@ -18,13 +15,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
 @Slf4j
 public class UpdateCooperationUseCase {
     private final CooperationService service;
-    private final CooperationResidentService cooperationResidentService;
+    private final FinancialObligationService financialObligationService;
     private final ResidentService residentService;
     private final CooperationAppMapper mapper;
 
@@ -34,37 +32,40 @@ public class UpdateCooperationUseCase {
         CooperationEntity existing = service.getByKey(communityKey, cooperationKey);
         mapper.updateEntityFromDto(dto, existing);
 
+        List<UUID> assignedResidents = List.of();
 
-        List<String> assignedResidents = List.of();
-
-        if(dto.getAssignmentType() != null && dto.getAssignmentType().equals(CooperationAssignmentType.INDIVIDUAL)){
-            assignedResidents = dto.getAssignedResidentKeys();
+        if (dto.getAssignmentType() != null && dto.getAssignmentType().equals(CooperationAssignmentType.INDIVIDUAL)) {
+            assignedResidents = dto.getAssignedResidentKeys().stream()
+                    .map(UUID::fromString).toList();
         } else {
-            List<ResidentEntity> residentsInCommunity = residentService.listByCommunity(
-                    communityKey
-            );
+            List<ResidentEntity> residentsInCommunity = residentService.listByCommunity(communityKey);
 
-            if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL)){
+            if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL)) {
                 assignedResidents = residentsInCommunity.stream()
-                        .map(resident -> resident.getKey().toString())
+                        .map(ResidentEntity::getKey)
                         .toList();
-            }
-            else if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL_EXCEPT)){
+            } else if (dto.getAssignmentType().equals(CooperationAssignmentType.ALL_EXCEPT)) {
                 assignedResidents = residentsInCommunity.stream()
                         .filter(resident -> !dto.getExcludedResidentKeys().contains(resident.getKey().toString()))
-                        .map(resident -> resident.getKey().toString())
+                        .map(ResidentEntity::getKey)
                         .toList();
             }
-
         }
 
-        cooperationResidentService.assignResidentsToCooperation(
-                cooperationKey,
-                assignedResidents
-        );
+        UUID cooperationUUID = UUID.fromString(cooperationKey);
+        financialObligationService.deleteByCooperation(cooperationUUID);
+
+        if (!assignedResidents.isEmpty()) {
+            financialObligationService.createForCooperation(
+                    cooperationUUID,
+                    existing.getCommunityKey(),
+                    existing.getDueDate(),
+                    existing.getBaseAmount(),
+                    assignedResidents
+            );
+        }
 
         var saved = service.update(existing);
         return mapper.toResponseSummaryDto(saved);
     }
-
 }

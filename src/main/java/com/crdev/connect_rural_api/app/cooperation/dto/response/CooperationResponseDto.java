@@ -1,13 +1,13 @@
 package com.crdev.connect_rural_api.app.cooperation.dto.response;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -28,4 +28,6 @@ public class CooperationResponseDto {
     private Boolean hasLateFee;
     private BigDecimal lateFeeAmount;
     private String lateFeePeriodicity;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocalDateTime closedAt;
 }

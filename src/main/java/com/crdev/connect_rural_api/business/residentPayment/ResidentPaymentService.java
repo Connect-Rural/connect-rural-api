@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,14 +23,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ResidentPaymentService {
 
+    private static final String DEFAULT_METHOD = "CASH";
+    private static final String REFERENCE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private static final Random RANDOM = new Random();
+
     private final ResidentPaymentRepository paymentRepository;
     private final PaymentAllocationRepository allocationRepository;
+
+    private String generateReference(LocalDate date) {
+        String datePart = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        StringBuilder suffix = new StringBuilder(6);
+        for (int i = 0; i < 6; i++) {
+            suffix.append(REFERENCE_CHARS.charAt(RANDOM.nextInt(REFERENCE_CHARS.length())));
+        }
+        return "PAY-" + datePart + "-" + suffix;
+    }
 
     @Transactional
     public ResidentPaymentEntity createPaymentForObligation(UUID residentKey, BigDecimal amount,
                                                              LocalDate paidAt, UUID obligationKey) {
         ResidentPaymentEntity payment = new ResidentPaymentEntity(
-                null, residentKey, amount, null, null, paidAt, null, null
+                null, residentKey, amount, DEFAULT_METHOD, generateReference(paidAt), paidAt, null, null
         );
         ResidentPaymentEntity saved = paymentRepository.save(payment);
 
@@ -43,8 +58,9 @@ public class ResidentPaymentService {
     @Transactional
     public void deletePaymentForObligation(UUID obligationKey) {
         allocationRepository.findByObligationKey(obligationKey).ifPresent(allocation -> {
-            paymentRepository.deleteById(allocation.getPaymentKey());
+            UUID paymentKey = allocation.getPaymentKey();
             allocationRepository.delete(allocation);
+            paymentRepository.deleteById(paymentKey);
         });
     }
 
