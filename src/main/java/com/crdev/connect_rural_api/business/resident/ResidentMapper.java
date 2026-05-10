@@ -22,35 +22,35 @@ public class ResidentMapper {
                 .filter(Objects::nonNull)
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.joining(", "));
-        return new ResidentResponse(
-                entity.getKey().toString(),
-                entity.getCommunityKey().toString(),
-                entity.getFirstName(),
-                entity.getLastName(),
-                address,
-                entity.getEmail(),
-                entity.getPhoneNumber(),
-                entity.getBirthDate(),
-                entity.getJoinedAt(),
-                entity.getActive()
-        );
+        return ResidentResponse.builder()
+                .key(entity.getKey().toString())
+                .communityKey(entity.getCommunityKey().toString())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .address(address)
+                .email(entity.getEmail())
+                .phoneNumber(entity.getPhoneNumber())
+                .birthDate(entity.getBirthDate())
+                .joinedAt(entity.getJoinedAt())
+                .active(entity.getActive())
+                .build();
     }
 
     public ResidentDetailResponse toResponseDetail(ResidentEntity entity) {
         if (entity == null) return null;
-        return new ResidentDetailResponse(
-                entity.getKey().toString(),
-                entity.getCommunityKey().toString(),
-                entity.getFirstName(),
-                entity.getLastName(),
-                entity.getBirthDate(),
-                entity.getPhoneNumber(),
-                entity.getEmail(),
-                entity.getAddress(),
-                entity.getAddressReference(),
-                entity.getJoinedAt(),
-                entity.getActive()
-        );
+        return ResidentDetailResponse.builder()
+                .key(entity.getKey().toString())
+                .communityKey(entity.getCommunityKey().toString())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .birthDate(entity.getBirthDate())
+                .phoneNumber(entity.getPhoneNumber())
+                .email(entity.getEmail())
+                .address(entity.getAddress())
+                .addressReference(entity.getAddressReference())
+                .joinedAt(entity.getJoinedAt())
+                .active(entity.getActive())
+                .build();
     }
 
     public List<ResidentResponse> toResponseList(List<ResidentEntity> entities) {

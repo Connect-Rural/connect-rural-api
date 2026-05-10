@@ -16,22 +16,22 @@ public class CommunityMapper {
 
     public CommunityResponse toResponse(CommunityEntity entity) {
         if (entity == null) return null;
-        return new CommunityResponse(
-                entity.getKey().toString(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getLogoUrl(),
-                entity.getAddress(),
-                entity.getState(),
-                entity.getMunicipality(),
-                entity.getPostalCode(),
-                entity.getSubscriptionPlan(),
-                entity.getCompletedConfiguration(),
-                entity.getActive(),
-                entity.getCreateAt(),
-                entity.getUpdatedAt(),
-                entity.getWhatsappAppKey()
-        );
+        return CommunityResponse.builder()
+                .key(entity.getKey().toString())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .logoUrl(entity.getLogoUrl())
+                .address(entity.getAddress())
+                .state(entity.getState())
+                .municipality(entity.getMunicipality())
+                .postalCode(entity.getPostalCode())
+                .subscriptionPlan(entity.getSubscriptionPlan())
+                .completedConfiguration(entity.getCompletedConfiguration())
+                .active(entity.getActive())
+                .createdAt(entity.getCreateAt())
+                .updatedAt(entity.getUpdatedAt())
+                .whatsappAppKey(entity.getWhatsappAppKey())
+                .build();
     }
 
     public CommunityAdminResponse toAdminResponse(CommunityEntity entity) {
@@ -41,20 +41,20 @@ public class CommunityMapper {
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.joining(", "));
 
-        return new CommunityAdminResponse(
-                entity.getKey().toString(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getLogoUrl(),
-                location,
-                entity.getSubscriptionPlan(),
-                entity.getCompletedConfiguration(),
-                "",
-                "",
-                1,
-                2,
-                entity.getActive()
-        );
+        return CommunityAdminResponse.builder()
+                .key(entity.getKey().toString())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .logoUrl(entity.getLogoUrl())
+                .location(location)
+                .subscriptionPlan(entity.getSubscriptionPlan())
+                .completedConfiguration(entity.getCompletedConfiguration())
+                .adminEmail("")
+                .adminPhone("")
+                .membersCount(1)
+                .usersCount(2)
+                .active(entity.getActive())
+                .build();
     }
 
     public List<CommunityAdminResponse> toAdminResponseList(List<CommunityEntity> entities) {

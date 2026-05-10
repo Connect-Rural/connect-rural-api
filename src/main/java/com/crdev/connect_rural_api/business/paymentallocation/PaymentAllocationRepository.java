@@ -1,6 +1,6 @@
 package com.crdev.connect_rural_api.business.paymentallocation;
 
-import com.crdev.connect_rural_api.data.paymentallocation.PaymentAllocationEntity;
+import com.crdev.connect_rural_api.data.paymentAllocation.PaymentAllocationEntity;
 
 import java.util.Collection;
 import java.util.List;

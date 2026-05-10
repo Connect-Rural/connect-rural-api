@@ -1,7 +1,7 @@
-package com.crdev.connect_rural_api.business.residentpayment;
+package com.crdev.connect_rural_api.business.residentPayment;
 
-import com.crdev.connect_rural_api.data.paymentallocation.PaymentAllocationEntity;
-import com.crdev.connect_rural_api.data.residentpayment.ResidentPaymentEntity;
+import com.crdev.connect_rural_api.data.paymentAllocation.PaymentAllocationEntity;
+import com.crdev.connect_rural_api.data.residentPayment.ResidentPaymentEntity;
 import com.crdev.connect_rural_api.business.paymentallocation.PaymentAllocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

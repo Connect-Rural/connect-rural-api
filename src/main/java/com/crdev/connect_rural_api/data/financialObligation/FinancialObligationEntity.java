@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.data.financialobligation;
+package com.crdev.connect_rural_api.data.financialObligation;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

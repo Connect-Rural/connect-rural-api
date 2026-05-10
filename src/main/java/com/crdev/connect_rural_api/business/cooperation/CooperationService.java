@@ -1,14 +1,14 @@
 package com.crdev.connect_rural_api.business.cooperation;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.*;
-import com.crdev.connect_rural_api.business.financialobligation.FinancialObligationService;
+import com.crdev.connect_rural_api.business.financialObligation.FinancialObligationService;
 import com.crdev.connect_rural_api.business.resident.ResidentRepository;
-import com.crdev.connect_rural_api.business.residentpayment.ResidentPaymentService;
+import com.crdev.connect_rural_api.business.residentPayment.ResidentPaymentService;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import com.crdev.connect_rural_api.data.cooperation.CooperationSpecs;
-import com.crdev.connect_rural_api.data.financialobligation.FinancialObligationEntity;
+import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
-import com.crdev.connect_rural_api.data.residentpayment.ResidentPaymentEntity;
+import com.crdev.connect_rural_api.data.residentPayment.ResidentPaymentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -137,12 +137,23 @@ public class CooperationService {
 
                 String fullName = resident.getFirstName()
                         + (resident.getLastName() != null ? " " + resident.getLastName() : "");
-                return new ResidentAssigned(
-                        resident.getKey().toString(), resident.getFirstName(), resident.getLastName(),
-                        fullName, coop.getAssignmentType(), resident.getPhoneNumber(), isPaid,
-                        amountPaid, paidAt, baseAmount, effectiveLateFee,
-                        baseAmount.add(effectiveLateFee), paymentStatus, lateFeeAmountPaid, lateFeePeriodsCount
-                );
+                return ResidentAssigned.builder()
+                        .key(resident.getKey().toString())
+                        .firstName(resident.getFirstName())
+                        .lastName(resident.getLastName())
+                        .residentName(fullName)
+                        .residentType(coop.getAssignmentType())
+                        .phoneNumber(resident.getPhoneNumber())
+                        .isPaid(isPaid)
+                        .amountPaid(amountPaid)
+                        .paidAt(paidAt)
+                        .baseAmount(baseAmount)
+                        .lateFeeAmount(effectiveLateFee)
+                        .totalAmount(baseAmount.add(effectiveLateFee))
+                        .paymentStatus(paymentStatus)
+                        .lateFeeAmountPaid(lateFeeAmountPaid)
+                        .lateFeePeriodsCount(lateFeePeriodsCount)
+                        .build();
             }).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
@@ -244,12 +255,23 @@ public class CooperationService {
             if (lateFeePeriodsCount == 0) lateFeePeriodsCount = null;
         }
 
-        return new ResidentAssigned(
-                resident.getKey().toString(), resident.getFirstName(), resident.getLastName(),
-                fullName, coop.getAssignmentType(), resident.getPhoneNumber(),
-                true, payment.getAmount(), payment.getPaidAt(), base,
-                BigDecimal.ZERO, base, "PAGADO", lateFeeAmountPaid, lateFeePeriodsCount
-        );
+        return ResidentAssigned.builder()
+                .key(resident.getKey().toString())
+                .firstName(resident.getFirstName())
+                .lastName(resident.getLastName())
+                .residentName(fullName)
+                .residentType(coop.getAssignmentType())
+                .phoneNumber(resident.getPhoneNumber())
+                .isPaid(true)
+                .amountPaid(payment.getAmount())
+                .paidAt(payment.getPaidAt())
+                .baseAmount(base)
+                .lateFeeAmount(BigDecimal.ZERO)
+                .totalAmount(base)
+                .paymentStatus("PAGADO")
+                .lateFeeAmountPaid(lateFeeAmountPaid)
+                .lateFeePeriodsCount(lateFeePeriodsCount)
+                .build();
     }
 
     @Transactional
@@ -269,14 +291,23 @@ public class CooperationService {
         BigDecimal lateFee = lateFeeCalculator.calculate(coop, today);
         String fullName = resident.getFirstName() + (resident.getLastName() != null ? " " + resident.getLastName() : "");
 
-        return new ResidentAssigned(
-                resident.getKey().toString(), resident.getFirstName(), resident.getLastName(),
-                fullName, coop.getAssignmentType(), resident.getPhoneNumber(),
-                false, null, null, coop.getBaseAmount(), lateFee,
-                coop.getBaseAmount().add(lateFee),
-                lateFeeCalculator.resolvePaymentStatus(false, coop.getDueDate(), today),
-                null, null
-        );
+        return ResidentAssigned.builder()
+                .key(resident.getKey().toString())
+                .firstName(resident.getFirstName())
+                .lastName(resident.getLastName())
+                .residentName(fullName)
+                .residentType(coop.getAssignmentType())
+                .phoneNumber(resident.getPhoneNumber())
+                .isPaid(false)
+                .amountPaid(null)
+                .paidAt(null)
+                .baseAmount(coop.getBaseAmount())
+                .lateFeeAmount(lateFee)
+                .totalAmount(coop.getBaseAmount().add(lateFee))
+                .paymentStatus(lateFeeCalculator.resolvePaymentStatus(false, coop.getDueDate(), today))
+                .lateFeeAmountPaid(null)
+                .lateFeePeriodsCount(null)
+                .build();
     }
 
     @Transactional

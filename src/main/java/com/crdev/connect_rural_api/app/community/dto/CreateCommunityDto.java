@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.app.community.dto.request;
+package com.crdev.connect_rural_api.app.community.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -21,44 +21,44 @@ public class CooperationMapper {
     public CooperationSummaryResponse toSummaryResponse(CooperationEntity entity, double progress,
                                                          int totalAssigned, int totalPending, int totalPaid) {
         if (entity == null) return null;
-        return new CooperationSummaryResponse(
-                entity.getKey().toString(),
-                entity.getCommunityKey().toString(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getBaseAmount(),
-                entity.getStatus(),
-                progress,
-                totalAssigned,
-                totalPaid,
-                totalPending,
-                entity.getStartDate(),
-                entity.getDueDate(),
-                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
-        );
+        return CooperationSummaryResponse.builder()
+                .key(entity.getKey().toString())
+                .communityKey(entity.getCommunityKey().toString())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .baseAmount(entity.getBaseAmount())
+                .status(entity.getStatus())
+                .progressPercentage(progress)
+                .totalAssignedResidents(totalAssigned)
+                .paidResidents(totalPaid)
+                .pendingResidents(totalPending)
+                .startDate(entity.getStartDate())
+                .dueDate(entity.getDueDate())
+                .closedAt("CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null)
+                .build();
     }
 
     public CooperationResponse toResponse(CooperationEntity entity,
                                           List<String> assignedResidents,
                                           List<String> excludedResidents) {
         if (entity == null) return null;
-        return new CooperationResponse(
-                entity.getKey().toString(),
-                entity.getCommunityKey().toString(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getBaseAmount(),
-                entity.getStartDate(),
-                entity.getDueDate(),
-                entity.getStatus(),
-                entity.getAssignmentType(),
-                assignedResidents,
-                excludedResidents,
-                entity.getAllowLateFee(),
-                entity.getLateFeeAmount(),
-                entity.getLateFeePeriod(),
-                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
-        );
+        return CooperationResponse.builder()
+                .key(entity.getKey().toString())
+                .communityKey(entity.getCommunityKey().toString())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .baseAmount(entity.getBaseAmount())
+                .startDate(entity.getStartDate())
+                .dueDate(entity.getDueDate())
+                .status(entity.getStatus())
+                .assignmentType(entity.getAssignmentType())
+                .assignedResidentKeys(assignedResidents)
+                .excludedResidentKeys(excludedResidents)
+                .hasLateFee(entity.getAllowLateFee())
+                .lateFeeAmount(entity.getLateFeeAmount())
+                .lateFeePeriodicity(entity.getLateFeePeriod())
+                .closedAt("CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null)
+                .build();
     }
 
     public CooperationEntity updateEntityFromRequest(CreateCooperationRequest request, CooperationEntity entity) {
@@ -84,24 +84,24 @@ public class CooperationMapper {
                                                        int paidResidents,
                                                        int pendingResidents) {
         if (entity == null) return null;
-        return new CooperationDetailResponse(
-                entity.getKey().toString(),
-                entity.getCommunityKey().toString(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getBaseAmount(),
-                entity.getStartDate(),
-                entity.getDueDate(),
-                entity.getStatus(),
-                assignments,
-                progressPercentage,
-                totalAssignedResidents,
-                paidResidents,
-                pendingResidents,
-                entity.getAllowLateFee(),
-                entity.getLateFeeAmount(),
-                entity.getLateFeePeriod(),
-                "CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null
-        );
+        return CooperationDetailResponse.builder()
+                .key(entity.getKey().toString())
+                .communityKey(entity.getCommunityKey().toString())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .baseAmount(entity.getBaseAmount())
+                .startDate(entity.getStartDate())
+                .dueDate(entity.getDueDate())
+                .status(entity.getStatus())
+                .assignments(assignments)
+                .progressPercentage(progressPercentage)
+                .totalAssignedResidents(totalAssignedResidents)
+                .paidResidents(paidResidents)
+                .pendingResidents(pendingResidents)
+                .hasLateFee(entity.getAllowLateFee())
+                .lateFeeAmount(entity.getLateFeeAmount())
+                .lateFeePeriodicity(entity.getLateFeePeriod())
+                .closedAt("CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null)
+                .build();
     }
 }

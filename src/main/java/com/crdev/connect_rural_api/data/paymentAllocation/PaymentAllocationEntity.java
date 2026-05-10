@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.data.paymentallocation;
+package com.crdev.connect_rural_api.data.paymentAllocation;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

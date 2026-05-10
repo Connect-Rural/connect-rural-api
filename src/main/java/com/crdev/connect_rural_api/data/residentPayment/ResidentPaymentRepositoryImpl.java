@@ -1,6 +1,6 @@
-package com.crdev.connect_rural_api.data.residentpayment;
+package com.crdev.connect_rural_api.data.residentPayment;
 
-import com.crdev.connect_rural_api.business.residentpayment.ResidentPaymentRepository;
+import com.crdev.connect_rural_api.business.residentPayment.ResidentPaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

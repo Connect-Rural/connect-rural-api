@@ -1,6 +1,6 @@
-package com.crdev.connect_rural_api.business.financialobligation;
+package com.crdev.connect_rural_api.business.financialObligation;
 
-import com.crdev.connect_rural_api.data.financialobligation.FinancialObligationEntity;
+import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationEntity;
 
 import java.util.List;
 import java.util.Optional;

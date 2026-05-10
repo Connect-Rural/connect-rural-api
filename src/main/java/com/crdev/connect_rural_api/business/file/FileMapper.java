@@ -12,15 +12,15 @@ public class FileMapper {
 
     public FileResponse toResponse(FileObjectEntity entity) {
         if (entity == null) return null;
-        return new FileResponse(
-                entity.getKey().toString(),
-                entity.getOriginalName(),
-                entity.getContentType(),
-                entity.getSize(),
-                entity.getStatus().name(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt()
-        );
+        return FileResponse.builder()
+                .key(entity.getKey().toString())
+                .originalName(entity.getOriginalName())
+                .contentType(entity.getContentType())
+                .size(entity.getSize())
+                .status(entity.getStatus().name())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 
     public List<FileResponse> toResponseList(List<FileObjectEntity> entities) {

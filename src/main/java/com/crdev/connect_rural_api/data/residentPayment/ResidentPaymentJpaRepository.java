@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.data.residentpayment;
+package com.crdev.connect_rural_api.data.residentPayment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
