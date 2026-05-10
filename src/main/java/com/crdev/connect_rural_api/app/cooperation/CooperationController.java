@@ -1,15 +1,7 @@
 package com.crdev.connect_rural_api.app.cooperation;
 
-import com.crdev.connect_rural_api.app.cooperation.dto.request.CooperationFilterDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequestDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.request.MarkAsPaidRequestDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationDetailResponseDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationResponseDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryPaginatedResponseDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.response.CooperationSummaryResponseDto;
-import com.crdev.connect_rural_api.app.cooperation.dto.response.ResidentAssigned;
-import com.crdev.connect_rural_api.business.cooperation.usecases.*;
-
+import com.crdev.connect_rural_api.app.cooperation.dto.*;
+import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,88 +16,68 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class CooperationController {
-    private final GetCooperationListUseCase getCooperationListUC;
-    private final GetCooperationPaginatedUseCase getCooperationPaginatedUC;
-    private final GetCooperationByKeyUseCase getCooperationByKeyUC;
-    private final GetCooperationDetailByKeyUseCase getCooperationDetailByKeyUC;
-    private final CreateCooperationUseCase createCooperationUC;
-    private final UpdateCooperationUseCase updateCooperationUC;
-    private final DeleteCooperationUseCase deleteCooperationUC;
-    private final MarkAsPaidUseCase markAsPaidUC;
-    private final MarkAsUnpaidUseCase markAsUnpaidUC;
-    private final MarkAllAsPaidUseCase markAllAsPaidUC;
-    private final CloseCooperationUseCase closeCooperationUC;
-    private final ReopenCooperationUseCase reopenCooperationUC;
+
+    private final CooperationService cooperationService;
 
     @GetMapping
-    public ResponseEntity<List<CooperationSummaryResponseDto>> list(@PathVariable String communityKey) {
-        return ResponseEntity.ok(getCooperationListUC.execute(communityKey));
+    public ResponseEntity<List<CooperationSummaryResponse>> list(@PathVariable String communityKey) {
+        return ResponseEntity.ok(cooperationService.getList(communityKey));
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<CooperationSummaryPaginatedResponseDto> getPaginated(
+    public ResponseEntity<CooperationPageResponse> getPaginated(
             @PathVariable String communityKey,
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size){
-        CooperationFilterDto filter =
-                new CooperationFilterDto(keyword, page, size);
-        return ResponseEntity.ok(
-                getCooperationPaginatedUC.execute(communityKey,filter)
-        );
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(cooperationService.getPaginated(communityKey,
+                new CooperationFilterRequest(keyword, page, size)));
     }
 
     @GetMapping("/{cooperationKey}")
-    public ResponseEntity<CooperationResponseDto>getByKey(@PathVariable String communityKey, @PathVariable String cooperationKey) {
-        return ResponseEntity.ok(getCooperationByKeyUC.execute(communityKey, cooperationKey));
+    public ResponseEntity<CooperationResponse> getByKey(@PathVariable String communityKey,
+                                                         @PathVariable String cooperationKey) {
+        return ResponseEntity.ok(cooperationService.getByKey(communityKey, cooperationKey));
     }
 
     @GetMapping("/{cooperationKey}/detail")
-    public ResponseEntity<CooperationDetailResponseDto> getDetailByKey(
-            @PathVariable String communityKey,
-            @PathVariable String cooperationKey) {
-        return ResponseEntity.ok(getCooperationDetailByKeyUC.execute(communityKey, cooperationKey));
+    public ResponseEntity<CooperationDetailResponse> getDetail(@PathVariable String communityKey,
+                                                                @PathVariable String cooperationKey) {
+        return ResponseEntity.ok(cooperationService.getDetail(communityKey, cooperationKey));
     }
 
     @PostMapping
-    public ResponseEntity<CooperationSummaryResponseDto> create(@PathVariable String communityKey,
-                                                                @Valid @RequestBody CreateCooperationRequestDto request) {
+    public ResponseEntity<CooperationSummaryResponse> create(@PathVariable String communityKey,
+                                                              @Valid @RequestBody CreateCooperationRequest request) {
         log.info("Cooperation create requested: communityKey={}, name={}", communityKey, request.getName());
-        return ResponseEntity.status(201).body(
-                createCooperationUC.execute(communityKey,request)
-        );
-
+        return ResponseEntity.status(201).body(cooperationService.create(communityKey, request));
     }
 
     @PatchMapping("/{cooperationKey}")
-    public ResponseEntity<CooperationSummaryResponseDto> update(@PathVariable String communityKey,
-                                                      @PathVariable String cooperationKey,
-                                                      @Valid @RequestBody CreateCooperationRequestDto updateRequest) {
+    public ResponseEntity<CooperationSummaryResponse> update(@PathVariable String communityKey,
+                                                              @PathVariable String cooperationKey,
+                                                              @Valid @RequestBody CreateCooperationRequest request) {
         log.info("Cooperation update requested: communityKey={}, cooperationKey={}", communityKey, cooperationKey);
-        return ResponseEntity.ok(updateCooperationUC.execute(communityKey,cooperationKey, updateRequest));
+        return ResponseEntity.ok(cooperationService.update(communityKey, cooperationKey, request));
     }
-
 
     @DeleteMapping("/{cooperationKey}")
-    public ResponseEntity<?> delete(@PathVariable String communityKey,
-                                    @PathVariable String cooperationKey) {
+    public ResponseEntity<Void> delete(@PathVariable String communityKey,
+                                        @PathVariable String cooperationKey) {
         log.info("Cooperation delete requested: communityKey={}, cooperationKey={}", communityKey, cooperationKey);
-        deleteCooperationUC.execute(communityKey, cooperationKey);
+        cooperationService.delete(communityKey, cooperationKey);
         return ResponseEntity.noContent().build();
     }
-
-    // ── Pagos ─────────────────────────────────────────────────────────────────
 
     @PatchMapping("/{cooperationKey}/residents/{residentKey}/pay")
     public ResponseEntity<ResidentAssigned> markAsPaid(
             @PathVariable String communityKey,
             @PathVariable String cooperationKey,
             @PathVariable String residentKey,
-            @RequestBody(required = false) MarkAsPaidRequestDto request) {
-        MarkAsPaidRequestDto body = request != null ? request : new MarkAsPaidRequestDto();
-        return ResponseEntity.ok(
-                markAsPaidUC.execute(communityKey, cooperationKey, residentKey, body.getAmountPaid(), body.getPaidAt())
-        );
+            @RequestBody(required = false) MarkAsPaidRequest request) {
+        MarkAsPaidRequest body = request != null ? request : new MarkAsPaidRequest();
+        return ResponseEntity.ok(cooperationService.markAsPaid(
+                communityKey, cooperationKey, residentKey, body.getAmountPaid(), body.getPaidAt()));
     }
 
     @PatchMapping("/{cooperationKey}/residents/{residentKey}/unpay")
@@ -113,32 +85,30 @@ public class CooperationController {
             @PathVariable String communityKey,
             @PathVariable String cooperationKey,
             @PathVariable String residentKey) {
-        return ResponseEntity.ok(markAsUnpaidUC.execute(communityKey, cooperationKey, residentKey));
+        return ResponseEntity.ok(cooperationService.markAsUnpaid(communityKey, cooperationKey, residentKey));
     }
 
     @PatchMapping("/{cooperationKey}/residents/pay-all")
-    public ResponseEntity<?> markAllAsPaid(
+    public ResponseEntity<Map<String, Integer>> markAllAsPaid(
             @PathVariable String communityKey,
             @PathVariable String cooperationKey) {
-        int updated = markAllAsPaidUC.execute(communityKey, cooperationKey);
+        int updated = cooperationService.markAllAsPaid(communityKey, cooperationKey);
         return ResponseEntity.ok(Map.of("updated", updated));
     }
 
-    // ── Estado ────────────────────────────────────────────────────────────────
-
     @PatchMapping("/{cooperationKey}/close")
-    public ResponseEntity<CooperationSummaryResponseDto> close(
+    public ResponseEntity<CooperationSummaryResponse> close(
             @PathVariable String communityKey,
             @PathVariable String cooperationKey) {
         log.info("Cooperation close requested: communityKey={}, cooperationKey={}", communityKey, cooperationKey);
-        return ResponseEntity.ok(closeCooperationUC.execute(communityKey, cooperationKey));
+        return ResponseEntity.ok(cooperationService.close(communityKey, cooperationKey));
     }
 
     @PatchMapping("/{cooperationKey}/reopen")
-    public ResponseEntity<CooperationSummaryResponseDto> reopen(
+    public ResponseEntity<CooperationSummaryResponse> reopen(
             @PathVariable String communityKey,
             @PathVariable String cooperationKey) {
         log.info("Cooperation reopen requested: communityKey={}, cooperationKey={}", communityKey, cooperationKey);
-        return ResponseEntity.ok(reopenCooperationUC.execute(communityKey, cooperationKey));
+        return ResponseEntity.ok(cooperationService.reopen(communityKey, cooperationKey));
     }
 }

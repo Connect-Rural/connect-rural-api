@@ -1,14 +1,13 @@
 package com.crdev.connect_rural_api.app.community;
 
-import com.crdev.connect_rural_api.app.community.dto.request.CreateCommunityDto;
-import com.crdev.connect_rural_api.app.community.dto.request.RegisterWhatsappTenantDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityAdminResponseDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityPaginatedResponseDto;
-import com.crdev.connect_rural_api.app.community.dto.response.CommunityResponseDto;
-import com.crdev.connect_rural_api.app.community.dto.request.CommunityFilterDto;
-import com.crdev.connect_rural_api.business.community.usecases.*;
-import com.crdev.connect_rural_api.business.whatsapp.usecases.RegisterCommunityTenantUseCase;
-import com.crdev.connect_rural_api.business.whatsapp.usecases.UnlinkCommunityTenantUseCase;
+import com.crdev.connect_rural_api.app.community.dto.CommunityAdminResponse;
+import com.crdev.connect_rural_api.app.community.dto.CommunityFilterRequest;
+import com.crdev.connect_rural_api.app.community.dto.CommunityPageResponse;
+import com.crdev.connect_rural_api.app.community.dto.CommunityResponse;
+import com.crdev.connect_rural_api.app.community.dto.CreateCommunityRequest;
+import com.crdev.connect_rural_api.app.community.dto.RegisterWhatsappTenantRequest;
+import com.crdev.connect_rural_api.business.community.CommunityService;
+import com.crdev.connect_rural_api.business.whatsapp.WhatsappService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,79 +23,61 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class CommunityController {
-    private final GetCommunityListUseCase communityListUseCase;
-    private final GetCommunityPaginatedUseCase communityPaginatedUseCase;
-    private final GetCommunityByKeyUseCase getCommunityByKeyUC;
-    private final CreateCommunityUseCase createCommunityUseCase;
-    private final UpdateCommunityUseCase updateCommunityUC;
-    private final DeleteCommunityUseCase deleteCommunityUC;
-    private final RegisterCommunityTenantUseCase registerCommunityTenantUC;
-    private final UnlinkCommunityTenantUseCase unlinkCommunityTenantUC;
+
+    private final CommunityService communityService;
+    private final WhatsappService whatsappService;
 
     @PostMapping
-    public ResponseEntity<CommunityResponseDto> create(@Valid @RequestBody CreateCommunityDto request) {
+    public ResponseEntity<CommunityResponse> create(@Valid @RequestBody CreateCommunityRequest request) {
         log.info("Community create requested: name={}", request.getName());
-        return ResponseEntity.status(201).body(
-                createCommunityUseCase.execute(request)
-        );
+        return ResponseEntity.status(201).body(communityService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<CommunityAdminResponseDto>> list() {
-        List<CommunityAdminResponseDto> response = communityListUseCase.execute();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<CommunityAdminResponse>> list() {
+        return ResponseEntity.ok(communityService.getList());
     }
 
     @GetMapping("/{key}")
-    public ResponseEntity<CommunityAdminResponseDto> getByKey(@PathVariable String key) {
-        return ResponseEntity.ok(getCommunityByKeyUC.execute(key));
+    public ResponseEntity<CommunityAdminResponse> getByKey(@PathVariable String key) {
+        return ResponseEntity.ok(communityService.getByKey(key));
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<CommunityPaginatedResponseDto> getPaginated(
+    public ResponseEntity<CommunityPageResponse> getPaginated(
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size){
-        CommunityFilterDto filter =
-                new CommunityFilterDto(keyword, page, size);
-        return ResponseEntity.ok(
-                communityPaginatedUseCase.execute(filter)
-        );
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(communityService.getPaginated(new CommunityFilterRequest(keyword, page, size)));
     }
 
     @PatchMapping("/{key}")
-    public ResponseEntity<CommunityAdminResponseDto> updateCommunity(@PathVariable String key, @Valid @RequestBody CreateCommunityDto updateRequest) {
+    public ResponseEntity<CommunityAdminResponse> update(@PathVariable String key,
+                                                          @Valid @RequestBody CreateCommunityRequest request) {
         log.info("Community update requested: key={}", key);
-        return ResponseEntity.ok(updateCommunityUC.execute(key, updateRequest));
+        return ResponseEntity.ok(communityService.update(key, request));
     }
 
     @DeleteMapping("/{key}")
-    public ResponseEntity<?> deleteCommunity(@PathVariable String key) {
+    public ResponseEntity<Void> delete(@PathVariable String key) {
         log.info("Community delete requested: key={}", key);
-        deleteCommunityUC.execute(key);
+        communityService.delete(key);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Registra la comunidad como tenant en el whatsapp-gateway.
-     * Guarda el appKey retornado en community.whatsappAppKey.
-     */
     @PostMapping("/{key}/whatsapp")
     public ResponseEntity<Map<String, UUID>> registerWhatsapp(
             @PathVariable String key,
-            @Valid @RequestBody RegisterWhatsappTenantDto request) {
+            @Valid @RequestBody RegisterWhatsappTenantRequest request) {
         log.info("Whatsapp tenant register requested: communityKey={}", key);
-        UUID appKey = registerCommunityTenantUC.execute(key, request);
+        UUID appKey = whatsappService.registerTenant(key, request);
         return ResponseEntity.status(201).body(Map.of("appKey", appKey));
     }
 
-    /**
-     * Elimina el tenant del gateway y desvincula la comunidad.
-     */
     @DeleteMapping("/{key}/whatsapp")
     public ResponseEntity<Void> unlinkWhatsapp(@PathVariable String key) {
         log.info("Whatsapp tenant unlink requested: communityKey={}", key);
-        unlinkCommunityTenantUC.execute(key);
+        whatsappService.unlinkTenant(key);
         return ResponseEntity.noContent().build();
     }
 }

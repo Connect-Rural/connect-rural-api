@@ -1,7 +1,6 @@
-package com.crdev.connect_rural_api.business.financialObligation;
+package com.crdev.connect_rural_api.business.financialobligation;
 
-import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationEntity;
-import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationRepository;
+import com.crdev.connect_rural_api.data.financialobligation.FinancialObligationEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

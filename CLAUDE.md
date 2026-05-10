@@ -37,51 +37,77 @@ connect-rural-api/
 │   │   │   ├── app/
 │   │   │   │   ├── community/
 │   │   │   │   │   ├── CommunityController.java
-│   │   │   │   │   └── dto/{request,response}/
-│   │   │   │   ├── cooperation/
-│   │   │   │   │   ├── CooperationController.java
-│   │   │   │   │   └── dto/{request,response}/
+│   │   │   │   │   └── dto/                       ← Request + Response DTOs
 │   │   │   │   ├── resident/
 │   │   │   │   │   ├── ResidentController.java
-│   │   │   │   │   └── dto/{request,response}/
-│   │   │   │   ├── controllers/
-│   │   │   │   │   └── HealthController.java
-│   │   │   │   └── exceptions/
+│   │   │   │   │   └── dto/
+│   │   │   │   ├── cooperation/
+│   │   │   │   │   ├── CooperationController.java
+│   │   │   │   │   └── dto/
+│   │   │   │   ├── file/
+│   │   │   │   │   ├── FileController.java
+│   │   │   │   │   └── dto/
+│   │   │   │   ├── whatsapp/
+│   │   │   │   │   ├── WhatsappCallbackController.java
+│   │   │   │   │   └── dto/
+│   │   │   │   └── shared/
 │   │   │   │       └── GlobalExceptionHandler.java
 │   │   │   ├── business/
 │   │   │   │   ├── community/
 │   │   │   │   │   ├── CommunityService.java
-│   │   │   │   │   ├── mapper/CommunityAppMapper.java
-│   │   │   │   │   └── usecases/          ← Create,Delete,Get*,Update use cases
+│   │   │   │   │   ├── CommunityRepository.java   ← interfaz (puerto BD)
+│   │   │   │   │   └── dto/
+│   │   │   │   ├── resident/
+│   │   │   │   │   ├── ResidentService.java
+│   │   │   │   │   ├── ResidentRepository.java
+│   │   │   │   │   └── dto/
 │   │   │   │   ├── cooperation/
 │   │   │   │   │   ├── CooperationService.java
-│   │   │   │   │   ├── enums/CooperationAssignmentType.java
-│   │   │   │   │   ├── mapper/CooperationAppMapper.java
-│   │   │   │   │   ├── specs/CooperationSpecs.java
-│   │   │   │   │   └── usecases/
-│   │   │   │   ├── cooperationResident/
-│   │   │   │   │   └── CooperationResidentService.java
-│   │   │   │   └── resident/
-│   │   │   │       ├── ResidentService.java
-│   │   │   │       ├── mapper/ResidentAppMapper.java
-│   │   │   │       ├── specs/ResidentSpecs.java
-│   │   │   │       └── usecases/
-│   │   │   │   ├── whatsapp/
-│   │   │   │   │   ├── WhatsappGatewayCallbackController.java  ← recibe eventos del gateway
-│   │   │   │   │   └── dto/request/   ← GatewayEventDto, GatewayMessageDto, GatewayStatusDto,
-│   │   │   │   │                          SendWhatsappMessageDto
-│   │   │   ├── business/
-│   │   │   │   ├── whatsapp/
-│   │   │   │   │   ├── WhatsappGatewayService.java  ← envía mensajes al gateway via HTTP
-│   │   │   │   │   └── usecases/      ← ProcessGatewayEventUseCase, SendWhatsappMessageUseCase
-│   │   │   ├── config/
-│   │   │   │   ├── CorsConfig.java
-│   │   │   │   └── WhatsappGatewayConfig.java  ← RestClient con X-API-Key
-│   │   │   └── data/
-│   │   │       ├── community/    ← CommunityEntity, CommunityRepository
-│   │   │       ├── cooperation/  ← CooperationEntity, CooperationRepository
-│   │   │       ├── cooperationResident/ ← CooperationResidentEntity, Repository
-│   │   │       └── resident/     ← ResidentEntity, ResidentRepository, SimpleResident
+│   │   │   │   │   ├── CooperationRepository.java
+│   │   │   │   │   ├── CooperationAssignmentType.java
+│   │   │   │   │   ├── LateFeeCalculator.java
+│   │   │   │   │   └── dto/
+│   │   │   │   ├── cooperationresident/
+│   │   │   │   │   ├── CooperationResidentService.java
+│   │   │   │   │   └── CooperationResidentRepository.java
+│   │   │   │   ├── financialobligation/
+│   │   │   │   │   ├── FinancialObligationService.java
+│   │   │   │   │   └── FinancialObligationRepository.java
+│   │   │   │   ├── residentpayment/
+│   │   │   │   │   ├── ResidentPaymentService.java
+│   │   │   │   │   └── ResidentPaymentRepository.java
+│   │   │   │   ├── file/
+│   │   │   │   │   ├── FileService.java
+│   │   │   │   │   ├── FileRepository.java
+│   │   │   │   │   ├── FileGateway.java           ← interfaz (puerto MinIO)
+│   │   │   │   │   └── dto/
+│   │   │   │   └── whatsapp/
+│   │   │   │       ├── WhatsappService.java
+│   │   │   │       └── WhatsappGateway.java       ← interfaz (puerto gateway HTTP)
+│   │   │   ├── data/
+│   │   │   │   ├── community/
+│   │   │   │   │   ├── CommunityRepositoryImpl.java
+│   │   │   │   │   ├── CommunityJpaRepository.java
+│   │   │   │   │   ├── CommunityEntity.java
+│   │   │   │   │   └── CommunitySpecs.java
+│   │   │   │   ├── resident/
+│   │   │   │   ├── cooperation/
+│   │   │   │   ├── cooperationresident/
+│   │   │   │   ├── financialobligation/
+│   │   │   │   ├── residentpayment/
+│   │   │   │   ├── paymentallocation/
+│   │   │   │   ├── file/
+│   │   │   │   │   ├── FileRepositoryImpl.java
+│   │   │   │   │   ├── FileGatewayImpl.java       ← MinIO client
+│   │   │   │   │   ├── FileJpaRepository.java
+│   │   │   │   │   ├── FileObjectEntity.java
+│   │   │   │   │   └── FileStatus.java
+│   │   │   │   └── whatsapp/
+│   │   │   │       └── WhatsappGatewayImpl.java   ← RestClient HTTP
+│   │   │   └── config/
+│   │   │       ├── CorsConfig.java
+│   │   │       ├── MinioConfig.java
+│   │   │       └── WhatsappGatewayConfig.java
 │   │   └── resources/
 │   │       ├── application.properties
 │   │       └── db/changelog/
@@ -100,91 +126,100 @@ connect-rural-api/
 
 **Stack**: Spring Boot 3.5 · Java 21 · PostgreSQL · Liquibase · Lombok
 
-The app follows a strict **3-layer architecture** enforced by package naming:
+**Pattern**: Hexagonal Architecture (Ports & Adapters) in 3 layers. Full details in [`docs/architecture.md`](docs/architecture.md).
 
 ```
-com.crdev.connect_rural_api/
-  app/        ← Controllers + Request/Response DTOs + GlobalExceptionHandler
-  business/   ← Use Cases + Services + Mappers + Specs + Enums
-  data/       ← JPA Entities + Repositories
-  config/     ← CORS and Spring configuration beans
+app/        ← HTTP adapters: Controllers + Request/Response DTOs
+business/   ← Domain: Services + Repository interfaces + Gateway interfaces + enums
+data/       ← Infrastructure: RepositoryImpl + JpaRepository + GatewayImpl + Entities + Specs
+config/     ← Spring configuration beans
 ```
 
-### Use Case Pattern
+### Dependency Rules
 
-Each CRUD operation lives in its own `@Component` class with a single `execute(...)` method (e.g., `CreateCooperationUseCase`, `GetCooperationDetailByKeyUseCase`). Controllers inject all relevant use cases via `@RequiredArgsConstructor`. Services handle repository access; use cases orchestrate business logic across multiple services.
+```
+Controller → Service                          ✓
+Service    → Repository (any module)          ✓
+Service    → Gateway                          ✓
+Service    → Service (another module)         ✗  never
+business   → data (direct import)             ✗  never
+```
+
+### Naming Conventions
+
+| Artifact | Pattern | Example |
+|---|---|---|
+| Controller | `{Module}Controller` | `CooperationController` |
+| Service | `{Module}Service` | `CooperationService` |
+| Repository interface | `{Module}Repository` in `business/` | `CooperationRepository` |
+| Gateway interface | `{Module}Gateway` in `business/` | `WhatsappGateway` |
+| Repository impl | `{Module}RepositoryImpl` in `data/` | `CooperationRepositoryImpl` |
+| Gateway impl | `{Module}GatewayImpl` in `data/` | `WhatsappGatewayImpl` |
+| Spring Data | `{Module}JpaRepository` in `data/` | `CooperationJpaRepository` |
+| JPA Entity | `{Module}Entity` | `CooperationEntity` |
+| JPA Specs | `{Module}Specs` in `data/` | `CooperationSpecs` |
+| Request DTO | `{Action}{Module}Request` | `CreateCooperationRequest` |
+| Response DTO | `{Module}Response` | `CooperationResponse` |
+| Paginated response | `{Module}PageResponse` | `CooperationPageResponse` |
+| Package names | lowercase, no camelCase | `cooperationresident/` |
 
 ### Domain Modules
 
-All domain modules follow the same internal structure under both `app/` and `business/`:
-
-- **community** – Top-level entity. Routes: `/api/communities`
-- **resident** – Scoped to a community. Routes: `/api/{communityKey}/residents`
-- **cooperation** – Payment collection system scoped to a community. Routes: `/api/{communityKey}/cooperations`
-- **cooperationResident** – Junction table tracking resident ↔ cooperation assignments and payment status. Managed only via `CooperationResidentService`; no dedicated controller. Payment endpoints live under `/api/{communityKey}/cooperations/{cooperationKey}/residents/`.
-- **whatsapp** – Integración con `whatsapp-gateway`. Recibe eventos normalizados en `POST /api/whatsapp/events` y envía mensajes vía `WhatsappGatewayService`. No tiene capa `data/` propia.
+- **community** — top-level entity. Routes: `/api/communities`
+- **resident** — scoped to a community. Routes: `/api/{communityKey}/residents`
+- **cooperation** — payment collection scoped to a community. Routes: `/api/{communityKey}/cooperations`
+- **cooperationresident** — junction table resident ↔ cooperation; no controller. Payment endpoints live under `/api/{communityKey}/cooperations/{cooperationKey}/residents/`
+- **financialobligation** — financial obligations; no controller
+- **residentpayment** — payment records; no controller
+- **file** — file metadata + MinIO storage. Routes: `/api/files`
+- **whatsapp** — integration with external whatsapp-gateway. Callback: `POST /api/whatsapp/events`
 
 ### WhatsApp Gateway Integration
 
-Cada **comunidad** puede ser un tenant independiente en el `whatsapp-gateway` (una cuenta de WhatsApp Business distinta por comunidad). El `tenantKey` del gateway se almacena en `community.whatsappAppKey`.
+Cada **comunidad** puede ser un tenant independiente en el `whatsapp-gateway`. El `tenantKey` se almacena en `community.whatsappAppKey`.
 
 **Flujo entrante** (Meta → gateway → connect-rural-api):
-1. Gateway llama `POST /api/whatsapp/events` con `GatewayEventDto`
-2. `ProcessGatewayEventUseCase` resuelve la comunidad por `whatsappAppKey = event.tenantKey`
-3. Aplica lógica de negocio de esa comunidad
+1. Gateway llama `POST /api/whatsapp/events`
+2. `WhatsappService` resuelve la comunidad por `whatsappAppKey = event.tenantKey`
 
 **Flujo saliente** (connect-rural-api → gateway → Meta):
-1. `SendWhatsappMessageUseCase.execute(appKey, to, text)` → `WhatsappGatewayService`
-2. `POST {gateway}/api/messages/send?appKey={communityWhatsappAppKey}`
+1. `WhatsappService` llama `WhatsappGateway` con `appKey`, destinatario y texto
+2. `WhatsappGatewayImpl` hace `POST {gateway}/api/messages/send?appKey={appKey}`
 
-**Registro de tenant** (administración):
-- `POST /api/communities/{key}/whatsapp` + `{phoneNumberId, accessToken}` → llama `POST {gateway}/api/tenants`, guarda appKey en la comunidad
-- `DELETE /api/communities/{key}/whatsapp` → elimina tenant del gateway y limpia appKey
+**Registro de tenant**:
+- `POST /api/communities/{key}/whatsapp` → registra comunidad en el gateway, guarda `appKey`
+- `DELETE /api/communities/{key}/whatsapp` → elimina tenant del gateway, limpia `appKey`
 
-**Notificación a residente**:
-- `NotifyResidentUseCase.execute(communityKey, residentKey, message)` — requiere `community.whatsappAppKey` y `resident.phoneNumber`
+### Cooperation Payment Flow
 
-**Use cases WhatsApp** en `business/whatsapp/usecases/`:
-- `ProcessGatewayEventUseCase` — procesa eventos entrantes del gateway
-- `SendWhatsappMessageUseCase` — envía mensajes vía gateway
-- `RegisterCommunityTenantUseCase` — registra comunidad como tenant en el gateway
-- `UnlinkCommunityTenantUseCase` — desvincula comunidad del gateway
-- `NotifyResidentUseCase` — envía mensaje a un residente por WhatsApp
+`GET /{cooperationKey}/detail` returns a list of assigned residents with computed fields:
+- `paymentStatus`: `PAGADO` | `VENCIDO` (unpaid & past dueDate) | `PENDIENTE`
+- `baseAmount`, `lateFeeAmount` (only when `VENCIDO`), `totalAmount`
+- `amountPaid`, `paidAt`
+
+Payment operations on `CooperationService`:
+- `markAsPaid(cooperationKey, residentKey, paidAt?, amountPaid?)` — `PATCH .../residents/{residentKey}/pay`
+- `markAsUnpaid(cooperationKey, residentKey)` — `PATCH .../residents/{residentKey}/unpay`
+- `markAllAsPaid(cooperationKey)` — `PATCH .../residents/pay-all` — returns `{ updated: N }`
+
+### Cooperation Status Flow
+
+Cooperations have `status`: `OPEN` (default) or `CLOSED`.
+
+- `close(cooperationKey)` — `PATCH /api/{communityKey}/cooperations/{cooperationKey}/close` — sets `status=CLOSED` and records `closedAt`; throws `IllegalStateException` if already closed.
 
 ### Database Migrations
 
 Schema changes go in `src/main/resources/db/changelog/scripts/` as SQL files and must be referenced in `db.changelog-master.xml`. Liquibase is disabled in the test profile; H2 auto-creates the schema via `ddl-auto=create-drop`.
 
-Schema migration note: base scripts (`0.0.1.sql` and `0.0.2.sql`) create/use `connect_rural` directly and enforce `public.uuid_generate_v4()` defaults for UUID primary keys.
-
-### Cooperation Payment Flow
-
-`GET /{cooperationKey}/detail` returns `CooperationDetailResponseDto` with a `List<ResidentAssigned>`. Each `ResidentAssigned` includes computed fields:
-- `residentName` (firstName + lastName), `residentType` (from `cooperation.assignmentType`)
-- `paymentStatus`: `PAGADO` | `VENCIDO` (unpaid & past dueDate) | `PENDIENTE`
-- `baseAmount`, `lateFeeAmount` (applied only when `VENCIDO`), `totalAmount`
-- `amountPaid`, `paidAt` from `cooperation_residents`
-
-Payment use cases in `business/cooperation/usecases/`:
-- `MarkAsPaidUseCase` — `PATCH /{cooperationKey}/residents/{residentKey}/pay` — body: `{ paidAt?, amountPaid? }` (both optional; defaults to today / baseAmount)
-- `MarkAsUnpaidUseCase` — `PATCH /{cooperationKey}/residents/{residentKey}/unpay`
-- `MarkAllAsPaidUseCase` — `PATCH /{cooperationKey}/residents/pay-all` — returns `{ updated: N }`
-
-`CooperationResidentService` owns all payment mutation logic. `ResidentService.getByKeys(Collection<UUID>)` batch-loads residents in one query (avoids N+1).
-
-### Cooperation Status Flow
-
-Cooperations have a `status` field with two values: `OPEN` (default on creation) and `CLOSED`.
-
-- `CloseCooperationUseCase` — `PATCH /api/{communityKey}/cooperations/{cooperationKey}/close` — sets `status=CLOSED`; irreversible (throws `IllegalStateException` if already `CLOSED`).
-- A `closedAt` timestamp is recorded on the `cooperations` table, added via migration `0.0.3.sql` (changeset `israel-CR:100326-001`).
+All SQL migrations must use schema-qualified table names (`connect_rural.<table>`) and `public.uuid_generate_v4()` for UUID defaults. Unqualified references will break in production.
 
 ### Key Conventions
 
-- UUID primary keys on all entities (e.g., `community_key`, `resident_key`).
-- Soft deletes via `active` boolean field on community and resident entities.
-- JPA Specifications (`*Specs.java`) used for dynamic filtering in paginated endpoints.
-- Mappers (`*AppMapper.java`) in `business/<module>/mapper/` handle all entity ↔ DTO conversion — never map inside controllers or use cases directly.
-- Validation errors return structured responses via `GlobalExceptionHandler` using `MethodArgumentNotValidException` and `ConstraintViolationException`.
-- CORS is configured in `CorsConfig.java` to allow `localhost:4200` (Angular frontend).
-- All SQL migrations use schema-qualified table names (`connect_rural.<table>`) and `public.uuid_generate_v4()` for UUID defaults. Unqualified references without `connect_rural.` will break in production.
+- UUID primary keys on all entities (`community_key`, `resident_key`, etc.)
+- Soft deletes via `active` boolean on community and resident entities
+- `{Module}Specs` in `data/` handle dynamic JPA filtering for paginated endpoints
+- Mappers live in `business/{module}/` as `{Module}Mapper` — they convert between entities and DTOs
+- `paymentallocation` module only has Repository interface/impl; no Service (accessed directly by `ResidentPaymentService`)
+- Validation errors return structured responses via `GlobalExceptionHandler` using `MethodArgumentNotValidException` and `ConstraintViolationException`
+- CORS configured in `CorsConfig.java` to allow `localhost:4200` (Angular frontend)

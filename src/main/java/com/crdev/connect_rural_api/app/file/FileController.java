@@ -1,12 +1,8 @@
 package com.crdev.connect_rural_api.app.file;
 
-import com.crdev.connect_rural_api.app.file.dto.response.FileResponseDto;
+import com.crdev.connect_rural_api.app.file.dto.FileResponse;
+import com.crdev.connect_rural_api.business.file.FileService;
 import com.crdev.connect_rural_api.business.file.dto.FileDownloadPayload;
-import com.crdev.connect_rural_api.business.file.usecases.DeleteFileUseCase;
-import com.crdev.connect_rural_api.business.file.usecases.DownloadFileUseCase;
-import com.crdev.connect_rural_api.business.file.usecases.GetFileMetadataUseCase;
-import com.crdev.connect_rural_api.business.file.usecases.ListFilesUseCase;
-import com.crdev.connect_rural_api.business.file.usecases.UploadFileUseCase;
 import com.crdev.connect_rural_api.data.file.FileObjectEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,31 +22,28 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FileController {
-    private final UploadFileUseCase uploadFileUseCase;
-    private final ListFilesUseCase listFilesUseCase;
-    private final GetFileMetadataUseCase getFileMetadataUseCase;
-    private final DownloadFileUseCase downloadFileUseCase;
-    private final DeleteFileUseCase deleteFileUseCase;
+
+    private final FileService fileService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<FileResponseDto> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file) {
         log.info("File upload requested: name={}, size={}", file.getOriginalFilename(), file.getSize());
-        return ResponseEntity.status(201).body(uploadFileUseCase.execute(file));
+        return ResponseEntity.status(201).body(fileService.upload(file));
     }
 
     @GetMapping
-    public ResponseEntity<List<FileResponseDto>> list() {
-        return ResponseEntity.ok(listFilesUseCase.execute());
+    public ResponseEntity<List<FileResponse>> list() {
+        return ResponseEntity.ok(fileService.list());
     }
 
     @GetMapping("/{key}")
-    public ResponseEntity<FileResponseDto> getMetadata(@PathVariable String key) {
-        return ResponseEntity.ok(getFileMetadataUseCase.execute(key));
+    public ResponseEntity<FileResponse> getMetadata(@PathVariable String key) {
+        return ResponseEntity.ok(fileService.getMetadata(key));
     }
 
     @GetMapping("/{key}/download")
     public ResponseEntity<InputStreamResource> download(@PathVariable String key) {
-        FileDownloadPayload payload = downloadFileUseCase.execute(key);
+        FileDownloadPayload payload = fileService.download(key);
         FileObjectEntity file = payload.file();
 
         String contentType = file.getContentType();
@@ -66,16 +59,13 @@ public class FileController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString());
 
-        if (file.getSize() != null) {
-            builder.contentLength(file.getSize());
-        }
-
+        if (file.getSize() != null) builder.contentLength(file.getSize());
         return builder.body(new InputStreamResource(payload.stream()));
     }
 
     @DeleteMapping("/{key}")
     public ResponseEntity<Void> delete(@PathVariable String key) {
-        deleteFileUseCase.execute(key);
+        fileService.delete(key);
         return ResponseEntity.noContent().build();
     }
 }

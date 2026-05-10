@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx skills:*)"
+      "Bash(npx skills:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Technologyland\\\\OneDrive\\\\Documentos\\\\CRDevelopment\\\\connect-rural-api\\\\src\\\\main\\\\java\" -Filter \"*.java\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ]
   }
 }

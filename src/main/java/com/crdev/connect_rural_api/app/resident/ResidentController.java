@@ -1,12 +1,12 @@
 package com.crdev.connect_rural_api.app.resident;
 
-import com.crdev.connect_rural_api.app.resident.dto.request.CreateResidentDto;
-import com.crdev.connect_rural_api.app.resident.dto.request.ResidentFilterDto;
-import com.crdev.connect_rural_api.app.resident.dto.response.ResidentDetailResponseDto;
-import com.crdev.connect_rural_api.app.resident.dto.response.ResidentPaginatedResponseDto;
-import com.crdev.connect_rural_api.app.resident.dto.response.ResidentResponseDto;
-import com.crdev.connect_rural_api.app.resident.dto.response.SimpleResidentResponseDto;
-import com.crdev.connect_rural_api.business.resident.usecases.*;
+import com.crdev.connect_rural_api.app.resident.dto.CreateResidentRequest;
+import com.crdev.connect_rural_api.app.resident.dto.ResidentDetailResponse;
+import com.crdev.connect_rural_api.app.resident.dto.ResidentFilterRequest;
+import com.crdev.connect_rural_api.app.resident.dto.ResidentPageResponse;
+import com.crdev.connect_rural_api.app.resident.dto.ResidentResponse;
+import com.crdev.connect_rural_api.app.resident.dto.SimpleResidentResponse;
+import com.crdev.connect_rural_api.business.resident.ResidentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,65 +20,55 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ResidentController {
-    private final GetResidentListByCommunityKeyUseCase getResidentListByCommunityKeyUC;
-    private final GetResidentPaginatedUseCase getResidentPaginatedUC;
-    private final GetResidentsCatalogUseCase getResidentsCatalogUC;
-    private final GetResidentByKeyUseCase getResidentByKeyUC;
-    private final CreateResidentUseCase createResidentUC;
-    private final UpdateResidentUseCase updateResidentUC;
-    private final DeleteResidentUseCase deleteResidentUC;
+
+    private final ResidentService residentService;
 
     @GetMapping
-    public ResponseEntity<List<ResidentResponseDto>> list(@PathVariable String communityKey) {
-
-        return ResponseEntity.ok(getResidentListByCommunityKeyUC.execute(communityKey));
+    public ResponseEntity<List<ResidentResponse>> list(@PathVariable String communityKey) {
+        return ResponseEntity.ok(residentService.listByCommunity(communityKey));
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<ResidentPaginatedResponseDto> getPaginated(
+    public ResponseEntity<ResidentPageResponse> getPaginated(
             @PathVariable String communityKey,
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size){
-        ResidentFilterDto filter =
-                new ResidentFilterDto(keyword, page, size);
-        return ResponseEntity.ok(
-                getResidentPaginatedUC.execute(communityKey,filter)
-        );
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(residentService.getPaginated(communityKey,
+                new ResidentFilterRequest(keyword, page, size)));
     }
+
     @GetMapping("/catalog")
-    public ResponseEntity<List<SimpleResidentResponseDto>> getCatalog(@PathVariable String communityKey) {
-        return ResponseEntity.ok(getResidentsCatalogUC.execute(communityKey));
+    public ResponseEntity<List<SimpleResidentResponse>> getCatalog(@PathVariable String communityKey) {
+        return ResponseEntity.ok(residentService.getCatalog(communityKey));
     }
 
     @GetMapping("/{residentKey}")
-    public ResponseEntity<ResidentDetailResponseDto>getByKey(@PathVariable String communityKey, @PathVariable String residentKey) {
-        return ResponseEntity.ok(getResidentByKeyUC.execute(communityKey, residentKey));
+    public ResponseEntity<ResidentDetailResponse> getByKey(@PathVariable String communityKey,
+                                                            @PathVariable String residentKey) {
+        return ResponseEntity.ok(residentService.getByKey(communityKey, residentKey));
     }
 
     @PostMapping
-    public ResponseEntity<ResidentResponseDto> create(  @PathVariable String communityKey,
-                                                        @Valid @RequestBody CreateResidentDto request) {
+    public ResponseEntity<ResidentResponse> create(@PathVariable String communityKey,
+                                                    @Valid @RequestBody CreateResidentRequest request) {
         log.info("Resident create requested: communityKey={}", communityKey);
-        return ResponseEntity.status(201).body(
-                createResidentUC.execute(communityKey,request)
-        );
+        return ResponseEntity.status(201).body(residentService.create(communityKey, request));
     }
 
     @PatchMapping("/{residentKey}")
-    public ResponseEntity<ResidentResponseDto> update(@PathVariable String communityKey,
-                                                      @PathVariable String residentKey,
-                                                      @Valid @RequestBody CreateResidentDto updateRequest) {
+    public ResponseEntity<ResidentResponse> update(@PathVariable String communityKey,
+                                                    @PathVariable String residentKey,
+                                                    @Valid @RequestBody CreateResidentRequest request) {
         log.info("Resident update requested: communityKey={}, residentKey={}", communityKey, residentKey);
-        return ResponseEntity.ok(updateResidentUC.execute(communityKey,residentKey, updateRequest));
+        return ResponseEntity.ok(residentService.update(communityKey, residentKey, request));
     }
 
     @DeleteMapping("/{residentKey}")
-    public ResponseEntity<?> delete(@PathVariable String communityKey,
-                                    @PathVariable String residentKey) {
+    public ResponseEntity<Void> delete(@PathVariable String communityKey,
+                                       @PathVariable String residentKey) {
         log.info("Resident delete requested: communityKey={}, residentKey={}", communityKey, residentKey);
-        deleteResidentUC.execute(communityKey, residentKey);
+        residentService.delete(communityKey, residentKey);
         return ResponseEntity.noContent().build();
     }
 }
-    
