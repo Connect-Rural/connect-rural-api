@@ -1,6 +1,7 @@
 package com.crdev.connect_rural_api.app.cooperation.dto;
 
 import com.crdev.connect_rural_api.business.cooperation.CooperationAssignmentType;
+import com.crdev.connect_rural_api.business.cooperation.CooperationPeriodicity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -31,4 +32,8 @@ public class CreateCooperationRequest {
     private Boolean hasLateFee = false;
     private BigDecimal lateFeeAmount = BigDecimal.ZERO;
     private String lateFeePeriodicity = "MONTHLY";
+    @NotNull(message = "La periodicidad es obligatoria")
+    private CooperationPeriodicity periodicity = CooperationPeriodicity.ONE_TIME;
+    private LocalDate endDate;
+
 }

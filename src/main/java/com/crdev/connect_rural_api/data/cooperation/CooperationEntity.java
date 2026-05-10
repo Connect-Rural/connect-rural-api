@@ -39,6 +39,10 @@ public class CooperationEntity {
     private String lateFeePeriod;
     @Column(name = "assignment_type", length = 20, nullable = false)
     private String assignmentType;
+    @Column(name = "periodicity", length = 20, nullable = false)
+    private String periodicity;
+    @Column(name = "end_date")
+    private LocalDate endDate;
     @Column(length = 20)
     private String status = "ACTIVE";
     @CreationTimestamp

@@ -48,6 +48,9 @@ public class FinancialObligationEntity {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Column(name = "period_ref")
+    private LocalDate periodRef;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

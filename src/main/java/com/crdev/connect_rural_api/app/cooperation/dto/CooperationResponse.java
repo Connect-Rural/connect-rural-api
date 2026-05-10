@@ -1,5 +1,6 @@
 package com.crdev.connect_rural_api.app.cooperation.dto;
 
+import com.crdev.connect_rural_api.business.cooperation.CooperationPeriodicity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class CooperationResponse {
     private BigDecimal baseAmount;
     private LocalDate startDate;
     private LocalDate dueDate;
+    private CooperationPeriodicity periodicity;
     private String status;
     private String assignmentType;
     private List<String> assignedResidentKeys;

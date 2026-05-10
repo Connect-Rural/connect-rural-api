@@ -1,5 +1,6 @@
 package com.crdev.connect_rural_api.app.cooperation.dto;
 
+import com.crdev.connect_rural_api.business.cooperation.CooperationPeriodicity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class CooperationSummaryResponse {
     private String description;
     private BigDecimal baseAmount;
     private String status;
+    private CooperationPeriodicity periodicity;
     private double progressPercentage;
     private int totalAssignedResidents;
     private int paidResidents;

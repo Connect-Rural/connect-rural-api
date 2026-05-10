@@ -1,6 +1,8 @@
 package com.crdev.connect_rural_api.business.financialObligation;
 
 import com.crdev.connect_rural_api.data.financialObligation.FinancialObligationEntity;
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class FinancialObligationService {
 
     @Transactional
     public void createForCooperation(UUID cooperationKey, UUID communityKey,
-                                     LocalDate dueDate, BigDecimal amountDue,
+                                     LocalDate dueDate, LocalDate periodRef,  BigDecimal amountDue,
                                      List<UUID> residentKeys) {
         List<FinancialObligationEntity> obligations = residentKeys.stream()
                 .map(residentKey -> new FinancialObligationEntity(
@@ -35,7 +37,7 @@ public class FinancialObligationService {
                         BigDecimal.ZERO,
                         STATUS_PENDING,
                         dueDate,
-                        null,
+                        periodRef, null,
                         null
                 ))
                 .toList();
@@ -49,6 +51,17 @@ public class FinancialObligationService {
     public List<FinancialObligationEntity> listPendingByCooperation(UUID cooperationKey) {
         return repository.findByOriginTypeAndOriginIdAndStatus(ORIGIN_COOPERATION, cooperationKey, STATUS_PENDING);
     }
+
+    public List<LocalDate> getPeriods(UUID cooperationKey) {
+        return repository.findByOriginTypeAndOriginId(ORIGIN_COOPERATION, cooperationKey)
+                .stream()
+                .map(FinancialObligationEntity::getPeriodRef)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
 
     public FinancialObligationEntity getByCooperationAndResident(UUID cooperationKey, UUID residentKey) {
         return repository.findByOriginTypeAndOriginIdAndResidentKey(ORIGIN_COOPERATION, cooperationKey, residentKey)

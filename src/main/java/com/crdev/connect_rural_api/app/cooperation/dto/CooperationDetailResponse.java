@@ -1,5 +1,6 @@
 package com.crdev.connect_rural_api.app.cooperation.dto;
 
+import com.crdev.connect_rural_api.business.cooperation.CooperationPeriodicity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,22 +17,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CooperationDetailResponse {
-    private String key;
-    private String communityKey;
-    private String name;
-    private String description;
-    private BigDecimal baseAmount;
-    private LocalDate startDate;
-    private LocalDate dueDate;
-    private String status;
-    private List<ResidentAssigned> assignments;
-    private double progressPercentage;
-    private int totalAssignedResidents;
-    private int paidResidents;
-    private int pendingResidents;
+
+    // private String key;
+    // private String communityKey;
+    // private String name;
+    // private String description;
+    // private BigDecimal baseAmount;
+    // private String status;
+    // private CooperationPeriodicity periodicity;
+    // private double progressPercentage;
+    // private int totalAssignedResidents;
+    // private int paidResidents;
+    // private int pendingResidents;
+    // private LocalDate startDate;
+    // private LocalDate dueDate;
+    // @JsonInclude(JsonInclude.Include.NON_NULL)
+    // private LocalDateTime closedAt;
+    private CooperationSummaryResponse info;
+    private List<PeriodSummaryResponse> periods;
     private Boolean hasLateFee;
     private BigDecimal lateFeeAmount;
     private String lateFeePeriodicity;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private LocalDateTime closedAt;
 }

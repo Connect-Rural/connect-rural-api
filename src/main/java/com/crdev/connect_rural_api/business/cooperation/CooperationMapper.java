@@ -1,6 +1,7 @@
 package com.crdev.connect_rural_api.business.cooperation;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.CreateCooperationRequest;
+import com.crdev.connect_rural_api.app.cooperation.dto.PeriodSummaryResponse;
 import com.crdev.connect_rural_api.app.cooperation.dto.CooperationDetailResponse;
 import com.crdev.connect_rural_api.app.cooperation.dto.CooperationResponse;
 import com.crdev.connect_rural_api.app.cooperation.dto.CooperationSummaryResponse;
@@ -8,6 +9,7 @@ import com.crdev.connect_rural_api.app.cooperation.dto.ResidentAssigned;
 import com.crdev.connect_rural_api.data.cooperation.CooperationEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class CooperationMapper {
                 .description(entity.getDescription())
                 .baseAmount(entity.getBaseAmount())
                 .status(entity.getStatus())
+                .periodicity(CooperationPeriodicity.valueOf(entity.getPeriodicity()))
                 .progressPercentage(progress)
                 .totalAssignedResidents(totalAssigned)
                 .paidResidents(totalPaid)
@@ -51,6 +54,7 @@ public class CooperationMapper {
                 .startDate(entity.getStartDate())
                 .dueDate(entity.getDueDate())
                 .status(entity.getStatus())
+                .periodicity(CooperationPeriodicity.valueOf(entity.getPeriodicity()))
                 .assignmentType(entity.getAssignmentType())
                 .assignedResidentKeys(assignedResidents)
                 .excludedResidentKeys(excludedResidents)
@@ -78,30 +82,28 @@ public class CooperationMapper {
     }
 
     public CooperationDetailResponse toDetailResponse(CooperationEntity entity,
-                                                       List<ResidentAssigned> assignments,
-                                                       double progressPercentage,
-                                                       int totalAssignedResidents,
-                                                       int paidResidents,
-                                                       int pendingResidents) {
+                                                       List<PeriodSummaryResponse> periods,
+                                                       CooperationSummaryResponse summaryResponse) {
         if (entity == null) return null;
         return CooperationDetailResponse.builder()
-                .key(entity.getKey().toString())
-                .communityKey(entity.getCommunityKey().toString())
-                .name(entity.getName())
-                .description(entity.getDescription())
-                .baseAmount(entity.getBaseAmount())
-                .startDate(entity.getStartDate())
-                .dueDate(entity.getDueDate())
-                .status(entity.getStatus())
-                .assignments(assignments)
-                .progressPercentage(progressPercentage)
-                .totalAssignedResidents(totalAssignedResidents)
-                .paidResidents(paidResidents)
-                .pendingResidents(pendingResidents)
+                .info(summaryResponse)
+                .periods(periods)
                 .hasLateFee(entity.getAllowLateFee())
                 .lateFeeAmount(entity.getLateFeeAmount())
                 .lateFeePeriodicity(entity.getLateFeePeriod())
-                .closedAt("CLOSED".equals(entity.getStatus()) ? entity.getClosedAt() : null)
+                .build();
+    }
+
+
+    public PeriodSummaryResponse toPeriodSummaryResponse(LocalDate periodRef,  LocalDate dueDate,double progress,int totalAssigned, int totalPending, int totalPaid, List<ResidentAssigned> assignments) {
+        return PeriodSummaryResponse.builder()
+                .periodRef(periodRef)
+                .dueDate(dueDate)
+                .progressPercentage(progress)
+                .totalAssignedResidents(totalAssigned)
+                .pendingResidents(totalPending)
+                .paidResidents(totalPaid)
+                .assignments(assignments)
                 .build();
     }
 }
