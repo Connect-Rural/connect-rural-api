@@ -78,6 +78,7 @@ public class CooperationMapper {
         entity.setAssignmentType(request.getAssignmentType().toString());
         entity.setStatus(request.getStatus());
         entity.setUpdatedAt(LocalDateTime.now());
+        entity.setPeriodicity(request.getPeriodicity().toString());
         return entity;
     }
 
