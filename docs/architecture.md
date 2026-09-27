@@ -18,29 +18,33 @@ config/     ← Beans de configuración Spring
 ### app/
 Recibe y responde peticiones HTTP. No contiene lógica de negocio.
 
-- `{Module}Controller` — mapea rutas HTTP, delega al Service
+- `{Module}Controller` — mapea rutas HTTP, traduce DTO ↔ modelo de dominio y delega al Service
+- `{Module}Mapper` — convierte **modelo de dominio ↔ DTO HTTP** (request → dominio y dominio → response). Vive aquí y no en business/ para que business/ no dependa de app/
 - `dto/{Action}{Module}Request` — DTO de entrada (`CreateCommunityRequest`, `UpdateResidentRequest`)
 - `dto/{Module}Response` — DTO de salida (`CommunityResponse`, `CooperationDetailResponse`)
 - `dto/{Module}PageResponse` — DTO de salida paginada
 - `shared/GlobalExceptionHandler` — manejo centralizado de errores HTTP
 
 ### business/
-Lógica de negocio pura. No importa nada de Spring Data ni JPA directamente.
+Lógica de negocio pura. **No importa nada de `data/`, de `app/` ni de Spring Data/JPA.**
 
-- `{Module}Service` — operaciones del dominio (create, update, delete, get, etc.)
-- `{Module}Repository` — **interfaz** (puerto) para acceso a BD, definida aquí, implementada en data
+- `{Module}` — **modelo de dominio** (`Community`, `Resident`, `Cooperation`). Es lo que devuelven y reciben los puertos; nunca una `*Entity`
+- `{Module}Service` — operaciones del dominio (create, update, delete, get, etc.). Devuelve modelos, no DTOs
+- `{Module}Repository` — **interfaz** (puerto) para acceso a BD, definida aquí, implementada en data. Sin `Page`, `Pageable`, `Specification` ni `*Entity`
+- `{Module}Query` — query object del dominio para búsquedas (`CommunityQuery{keyword}`); data/ lo traduce a `Specification`
 - `{Module}Gateway` — **interfaz** (puerto) para sistemas externos (HTTP, MinIO), solo donde aplica
-- `dto/{Module}Model` — modelo interno de dominio, solo si se necesita separar del DTO HTTP
+- `shared/` — abstracciones de dominio reutilizables: `PageParams` (page/size validados) y `PagedResult<T>` (sustituto de `Page` de Spring Data)
 - Enums, calculadoras y helpers viven planos en el paquete del módulo
 
 ### data/
 Implementación de infraestructura. Depende de business para implementar sus interfaces.
 
-- `{Module}RepositoryImpl` — implementa `{Module}Repository` usando JPA
+- `{Module}RepositoryImpl` — implementa `{Module}Repository`: traduce `*Entity` ↔ modelo, y `{Module}Query` → `Specification`, `Page` → `PagedResult`. **Único sitio donde conviven tipos de Spring Data y modelos de dominio**
 - `{Module}JpaRepository` — Spring Data `JpaRepository`, solo usado por `RepositoryImpl`
 - `{Module}Entity` — entidad JPA
+- `{Module}EntityMapper` — mapea **entidad JPA ↔ modelo de dominio** (`CommunityEntityMapper`)
 - `{Module}Specs` — JPA Specifications para filtros dinámicos
-- `{Module}GatewayImpl` — implementa `{Module}Gateway` (RestClient HTTP, MinIO client, etc.)
+- `{Module}GatewayImpl` — implementación de `{Module}Gateway` (RestClient HTTP, MinIO client, etc.)
 
 ---
 
@@ -50,14 +54,51 @@ Implementación de infraestructura. Depende de business para implementar sus int
 app        →  business           ✓
 business   →  data               ✗  (business solo conoce sus propias interfaces)
 data       →  business           ✓  (implementa interfaces de business)
+data       →  app                ✗  nunca
 
 Controller →  Service            ✓
+Controller →  {Module}Mapper     ✓  (solo para traducir DTO ↔ modelo)
 Service    →  Repository (propio)     ✓
 Service    →  Repository (otro módulo) ✓  (solo lectura recomendada)
 Service    →  Gateway            ✓
 Service    →  Service (otro)     ✗  nunca
 Controller →  Repository         ✗
 ```
+
+Imports prohibidos en `business/`:
+
+| Import | Por qué |
+|---|---|
+| `...connect_rural_api.data.*` | El dominio no conoce JPA ni entidades |
+| `...connect_rural_api.app.*` | La dependencia es unidireccional: app → business |
+| `org.springframework.data.*` | Los puertos usan `PagedResult`/`PageParams`/`{Module}Query` |
+| `org.springframework.web.*`, `MultipartFile` | El dominio no conoce HTTP |
+
+---
+
+## Migración a hexagonal estricta (Opción B)
+
+Estado por módulo. Un módulo está migrado cuando: tiene modelo de dominio,
+el puerto no expone tipos de JPA/entidades, el mapper HTTP vive en app/ y su
+`*EntityMapper` vive en data/.
+
+| Módulo | Estado |
+|---|---|
+| community | ✅ migrado (+ `business/shared`, + tests unitarios sin BD) |
+| resident | ⬜ pendiente |
+| cooperation | ⬜ pendiente |
+| financialobligation | ⬜ pendiente |
+| residentpayment | ⬜ pendiente |
+| paymentallocation | ⬜ pendiente |
+| file | ⬜ pendiente |
+| whatsapp | ⬜ pendiente (sus gateways ya son puertos; falta el mapper de respuesta) |
+
+Plantilla a replicar (módulo `community`):
+`business/community/{Community,CommunityQuery,CommunityRepository,CommunityService}.java` ·
+`business/shared/{PageParams,PagedResult}.java` ·
+`app/community/CommunityMapper.java` ·
+`data/community/{CommunityEntityMapper,CommunitySpecs,CommunityRepositoryImpl}.java` ·
+`src/test/java/.../business/community/CommunityServiceTest.java` (fake en memoria, sin Spring ni H2).
 
 ---
 
@@ -70,6 +111,7 @@ com.crdev.connect_rural_api/
 ├── app/
 │   ├── community/
 │   │   ├── CommunityController.java
+│   │   ├── CommunityMapper.java            ← modelo de dominio ↔ DTO HTTP
 │   │   └── dto/
 │   │       ├── CreateCommunityRequest.java
 │   │       ├── UpdateCommunityRequest.java
@@ -92,14 +134,17 @@ com.crdev.connect_rural_api/
 │       └── GlobalExceptionHandler.java
 │
 ├── business/
+│   ├── shared/                             ← abstracciones de dominio
+│   │   ├── PageParams.java                 ← page/size validados (sustituye a Pageable)
+│   │   └── PagedResult.java                ← resultado paginado (sustituye a Page)
 │   ├── community/
+│   │   ├── Community.java                  ← modelo de dominio (sustituye a CommunityEntity)
 │   │   ├── CommunityService.java
-│   │   ├── CommunityRepository.java        ← interfaz (puerto BD)
-│   │   └── dto/
+│   │   ├── CommunityRepository.java        ← interfaz (puerto BD), sin tipos JPA
+│   │   └── CommunityQuery.java             ← query object del dominio
 │   ├── resident/
 │   │   ├── ResidentService.java
-│   │   ├── ResidentRepository.java
-│   │   └── dto/
+│   │   └── ResidentRepository.java
 │   ├── cooperation/
 │   │   ├── CooperationService.java
 │   │   ├── CooperationRepository.java
@@ -126,9 +171,10 @@ com.crdev.connect_rural_api/
 │
 ├── data/
 │   ├── community/
-│   │   ├── CommunityRepositoryImpl.java   ← implements CommunityRepository
+│   │   ├── CommunityRepositoryImpl.java   ← implements CommunityRepository (Entity ↔ dominio)
 │   │   ├── CommunityJpaRepository.java    ← Spring Data
 │   │   ├── CommunityEntity.java
+│   │   ├── CommunityEntityMapper.java     ← entidad JPA ↔ modelo de dominio
 │   │   └── CommunitySpecs.java
 │   ├── resident/
 │   │   ├── ResidentRepositoryImpl.java
@@ -179,9 +225,14 @@ com.crdev.connect_rural_api/
 |---|---|---|
 | Controlador | `{Module}Controller` | `CooperationController` |
 | Servicio | `{Module}Service` | `CooperationService` |
-| Puerto BD (interfaz) | `{Module}Repository` | `CooperationRepository` |
+| Modelo de dominio | `{Module}` en `business/{module}/` | `Community` |
+| Puerto BD (interfaz) | `{Module}Repository` en `business/{module}/` | `CooperationRepository` |
 | Puerto externo (interfaz) | `{Module}Gateway` | `WhatsappGateway` |
-| Adaptador BD | `{Module}RepositoryImpl` | `CooperationRepositoryImpl` |
+| Query object | `{Module}Query` en `business/{module}/` | `CommunityQuery` |
+| Paginación de dominio | `PageParams`, `PagedResult` en `business/shared/` | `PagedResult<Community>` |
+| Mapper HTTP (dominio ↔ DTO) | `{Module}Mapper` en `app/{module}/` | `CommunityMapper` |
+| Mapper entidad (JPA ↔ dominio) | `{Module}EntityMapper` en `data/{module}/` | `CommunityEntityMapper` |
+| Adaptador BD | `{Module}RepositoryImpl` en `data/{module}/` | `CooperationRepositoryImpl` |
 | Adaptador externo | `{Module}GatewayImpl` | `WhatsappGatewayImpl` |
 | Spring Data | `{Module}JpaRepository` | `CooperationJpaRepository` |
 | Entidad JPA | `{Module}Entity` | `CooperationEntity` |
@@ -189,7 +240,6 @@ com.crdev.connect_rural_api/
 | DTO entrada HTTP | `{Action}{Module}Request` | `CreateCooperationRequest` |
 | DTO salida HTTP | `{Module}Response` | `CooperationResponse` |
 | DTO salida paginada | `{Module}PageResponse` | `CooperationPageResponse` |
-| Modelo interno | `{Module}Model` | `CooperationModel` |
 | Enum | `{Concept}` plano en el módulo | `CooperationAssignmentType` |
 | Paquetes | todo lowercase, sin camelCase | `cooperationresident/` |
 

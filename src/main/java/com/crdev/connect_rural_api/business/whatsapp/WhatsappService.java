@@ -4,9 +4,9 @@ import com.crdev.connect_rural_api.app.community.dto.RegisterWhatsappTenantReque
 import com.crdev.connect_rural_api.app.whatsapp.dto.GatewayEventRequest;
 import com.crdev.connect_rural_api.app.whatsapp.dto.GatewayMessageRequest;
 import com.crdev.connect_rural_api.app.whatsapp.dto.GatewayStatusRequest;
+import com.crdev.connect_rural_api.business.community.Community;
 import com.crdev.connect_rural_api.business.community.CommunityRepository;
 import com.crdev.connect_rural_api.business.resident.ResidentRepository;
-import com.crdev.connect_rural_api.data.community.CommunityEntity;
 import com.crdev.connect_rural_api.data.resident.ResidentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class WhatsappService {
     public void processEvent(GatewayEventRequest event) {
         if (event == null || event.getEvent() == null) return;
         UUID appKey = UUID.fromString(event.getTenantKey());
-        CommunityEntity community = communityRepository.findByWhatsappAppKeyAndActiveTrue(appKey).orElse(null);
+        Community community = communityRepository.findByWhatsappAppKeyAndActiveTrue(appKey).orElse(null);
         if (community == null) {
             log.warn("[WhatsApp] Evento ignorado - no hay comunidad vinculada al tenant {}", appKey);
             return;
@@ -43,7 +43,7 @@ public class WhatsappService {
     }
 
     public UUID registerTenant(String communityKey, RegisterWhatsappTenantRequest request) {
-        CommunityEntity community = findCommunity(communityKey);
+        Community community = findCommunity(communityKey);
         if (community.getWhatsappAppKey() != null) {
             throw new IllegalStateException(
                     "La comunidad ya tiene un tenant de WhatsApp vinculado: " + community.getWhatsappAppKey());
@@ -58,7 +58,7 @@ public class WhatsappService {
     }
 
     public void unlinkTenant(String communityKey) {
-        CommunityEntity community = findCommunity(communityKey);
+        Community community = findCommunity(communityKey);
         if (community.getWhatsappAppKey() == null) {
             throw new IllegalStateException("La comunidad no tiene ningún tenant de WhatsApp vinculado");
         }
@@ -69,7 +69,7 @@ public class WhatsappService {
     }
 
     public void notifyResident(String communityKey, String residentKey, String message) {
-        CommunityEntity community = findCommunity(communityKey);
+        Community community = findCommunity(communityKey);
         if (community.getWhatsappAppKey() == null) {
             throw new IllegalStateException("La comunidad no tiene WhatsApp configurado");
         }
@@ -83,7 +83,7 @@ public class WhatsappService {
         log.info("[WhatsApp] Notificación enviada al residente {} de la comunidad {}", residentKey, community.getName());
     }
 
-    private void handleMessage(CommunityEntity community, GatewayMessageRequest message) {
+    private void handleMessage(Community community, GatewayMessageRequest message) {
         if (message == null) return;
         log.info("[WhatsApp] Mensaje recibido - comunidad: {}, de: {}, tipo: {}",
                 community.getName(), message.getFrom(), message.getType());
@@ -99,7 +99,7 @@ public class WhatsappService {
                 status.getMessageId(), status.getStatus(), status.getRecipient());
     }
 
-    private CommunityEntity findCommunity(String communityKey) {
+    private Community findCommunity(String communityKey) {
         return communityRepository.findById(UUID.fromString(communityKey))
                 .orElseThrow(() -> new IllegalArgumentException("Community not found"));
     }

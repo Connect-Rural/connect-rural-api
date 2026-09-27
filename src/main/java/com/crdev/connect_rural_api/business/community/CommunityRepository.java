@@ -1,19 +1,30 @@
 package com.crdev.connect_rural_api.business.community;
 
-import com.crdev.connect_rural_api.data.community.CommunityEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import com.crdev.connect_rural_api.business.shared.PageParams;
+import com.crdev.connect_rural_api.business.shared.PagedResult;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Puerto de persistencia de comunidades.
+ *
+ * Sin tipos de Spring Data (Page, Pageable, Specification) y sin entidades
+ * JPA: todo se expone en términos del dominio (Community, CommunityQuery,
+ * PagedResult). La implementación vive en data/community/.
+ */
 public interface CommunityRepository {
-    List<CommunityEntity> findAll();
-    Page<CommunityEntity> findAll(Specification<CommunityEntity> spec, Pageable pageable);
-    CommunityEntity save(CommunityEntity entity);
-    Optional<CommunityEntity> findById(UUID key);
+
+    Community save(Community community);
+
+    Optional<Community> findById(UUID key);
+
+    List<Community> findAll();
+
+    PagedResult<Community> findAll(CommunityQuery query, PageParams page);
+
     void deleteById(UUID key);
-    Optional<CommunityEntity> findByWhatsappAppKeyAndActiveTrue(UUID whatsappAppKey);
+
+    Optional<Community> findByWhatsappAppKeyAndActiveTrue(UUID whatsappAppKey);
 }
