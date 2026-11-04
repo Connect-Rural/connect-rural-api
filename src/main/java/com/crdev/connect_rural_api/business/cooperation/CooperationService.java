@@ -1,6 +1,8 @@
 package com.crdev.connect_rural_api.business.cooperation;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.*;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.CooperationFilterRequest;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequest;
 import com.crdev.connect_rural_api.business.financialObligation.FinancialObligationService;
 import com.crdev.connect_rural_api.business.resident.ResidentRepository;
 import com.crdev.connect_rural_api.business.residentPayment.ResidentPaymentService;

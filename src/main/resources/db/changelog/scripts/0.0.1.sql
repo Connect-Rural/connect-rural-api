@@ -1,8 +1,8 @@
 -- liquibase formatted sql
 
--- changeset israel-CR:001-01
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;
-CREATE SCHEMA IF NOT EXISTS connect_rural;
+-- -- changeset israel-CR:001-01
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA public;
+-- CREATE SCHEMA IF NOT EXISTS connect_rural;
 
 
 -- ============================================================

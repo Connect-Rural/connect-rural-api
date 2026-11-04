@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FinancialObligationService {
 
-    private static final String ORIGIN_COOPERATION = "COOPERATION";
+    private static final String ORIGIN_F_OBLIGATION = "COOPERATION";
     private static final String STATUS_PENDING = "PENDING";
     private static final String STATUS_PAID = "PAID";
 
@@ -31,7 +31,7 @@ public class FinancialObligationService {
                         null,
                         residentKey,
                         communityKey,
-                        ORIGIN_COOPERATION,
+                        ORIGIN_F_OBLIGATION,
                         cooperationKey,
                         amountDue,
                         BigDecimal.ZERO,
@@ -45,15 +45,15 @@ public class FinancialObligationService {
     }
 
     public List<FinancialObligationEntity> listByCooperation(UUID cooperationKey) {
-        return repository.findByOriginTypeAndOriginId(ORIGIN_COOPERATION, cooperationKey);
+        return repository.findByOriginTypeAndOriginId(ORIGIN_F_OBLIGATION, cooperationKey);
     }
 
     public List<FinancialObligationEntity> listPendingByCooperation(UUID cooperationKey) {
-        return repository.findByOriginTypeAndOriginIdAndStatus(ORIGIN_COOPERATION, cooperationKey, STATUS_PENDING);
+        return repository.findByOriginTypeAndOriginIdAndStatus(ORIGIN_F_OBLIGATION, cooperationKey, STATUS_PENDING);
     }
 
     public List<LocalDate> getPeriods(UUID cooperationKey) {
-        return repository.findByOriginTypeAndOriginId(ORIGIN_COOPERATION, cooperationKey)
+        return repository.findByOriginTypeAndOriginId(ORIGIN_F_OBLIGATION, cooperationKey)
                 .stream()
                 .map(FinancialObligationEntity::getPeriodRef)
                 .filter(Objects::nonNull)
@@ -64,7 +64,7 @@ public class FinancialObligationService {
 
 
     public FinancialObligationEntity getByCooperationAndResident(UUID cooperationKey, UUID residentKey) {
-        return repository.findByOriginTypeAndOriginIdAndResidentKey(ORIGIN_COOPERATION, cooperationKey, residentKey)
+        return repository.findByOriginTypeAndOriginIdAndResidentKey(ORIGIN_F_OBLIGATION, cooperationKey, residentKey)
                 .orElseThrow(() -> new IllegalArgumentException("Financial obligation not found for resident"));
     }
 
@@ -79,7 +79,7 @@ public class FinancialObligationService {
 
     @Transactional
     public void deleteByCooperation(UUID cooperationKey) {
-        repository.deleteByOriginTypeAndOriginId(ORIGIN_COOPERATION, cooperationKey);
+        repository.deleteByOriginTypeAndOriginId(ORIGIN_F_OBLIGATION, cooperationKey);
     }
 
     @Transactional

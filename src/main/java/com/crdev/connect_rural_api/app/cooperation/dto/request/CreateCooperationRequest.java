@@ -1,4 +1,4 @@
-package com.crdev.connect_rural_api.app.cooperation.dto;
+package com.crdev.connect_rural_api.app.cooperation.dto.request;
 
 import com.crdev.connect_rural_api.business.cooperation.CooperationAssignmentType;
 import com.crdev.connect_rural_api.business.cooperation.CooperationPeriodicity;

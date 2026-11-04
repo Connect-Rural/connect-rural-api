@@ -1,6 +1,9 @@
 package com.crdev.connect_rural_api.app.cooperation;
 
 import com.crdev.connect_rural_api.app.cooperation.dto.*;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.CooperationFilterRequest;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequest;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.MarkAsPaidRequest;
 import com.crdev.connect_rural_api.business.cooperation.CooperationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

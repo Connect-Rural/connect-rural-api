@@ -1,6 +1,6 @@
 package com.crdev.connect_rural_api.business.cooperation;
 
-import com.crdev.connect_rural_api.app.cooperation.dto.CreateCooperationRequest;
+import com.crdev.connect_rural_api.app.cooperation.dto.request.CreateCooperationRequest;
 import com.crdev.connect_rural_api.app.cooperation.dto.PeriodSummaryResponse;
 import com.crdev.connect_rural_api.app.cooperation.dto.CooperationDetailResponse;
 import com.crdev.connect_rural_api.app.cooperation.dto.CooperationResponse;
