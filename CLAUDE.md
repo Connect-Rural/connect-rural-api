@@ -210,7 +210,7 @@ Cooperations have `status`: `OPEN` (default) or `CLOSED`.
 
 ### Database Migrations
 
-Schema changes go in `src/main/resources/db/changelog/scripts/` as SQL files and must be referenced in `db.changelog-master.xml`. Liquibase is disabled in the test profile; H2 auto-creates the schema via `ddl-auto=create-drop`.
+Schema changes go in `api/src/main/resources` as SQL files and must be referenced in `db.changelog-master.xml`. Liquibase is disabled in the test profile; H2 auto-creates the schema via `ddl-auto=create-drop`.
 
 All SQL migrations must use schema-qualified table names (`connect_rural.<table>`) and `public.uuid_generate_v4()` for UUID defaults. Unqualified references will break in production.
 

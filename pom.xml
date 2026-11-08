@@ -9,8 +9,9 @@
         <relativePath/> <!-- lookup parent from repositories -->
     </parent>
     <groupId>com.crdev</groupId>
-    <artifactId>connect-rural-api</artifactId>
+    <artifactId>connect-rural-api-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>connect_rural</name>
     <description>Api gestion de comunidades rurales</description>
     <url/>
@@ -30,6 +31,12 @@
         <java.version>21</java.version>
         <minio.version>8.5.7</minio.version>
     </properties>
+    <modules>
+        <module>models</module>
+        <module>repositories</module>
+        <module>services</module>
+        <module>api</module>
+    </modules>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

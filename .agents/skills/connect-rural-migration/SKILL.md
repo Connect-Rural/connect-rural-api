@@ -7,7 +7,7 @@ description: "Guide for writing Liquibase SQL migrations in connect-rural-api. U
 
 ## Overview
 
-Migrations are plain SQL files with Liquibase annotations placed in `src/main/resources/db/changelog/scripts/`. The master changelog uses `<includeAll>` so **new files are picked up automatically by alphabetical order — no need to edit `db.changelog-master.xml`**.
+Migrations are plain SQL files with Liquibase annotations placed in `../../../api/src/main/resources`. The master changelog uses `<includeAll>` so **new files are picked up automatically by alphabetical order — no need to edit `db.changelog-master.xml`**.
 
 See `references/patterns.md` for SQL templates and naming conventions.
 

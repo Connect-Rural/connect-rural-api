@@ -230,7 +230,7 @@ com.crdev.connect_rural_api/
 | Puerto externo (interfaz) | `{Module}Gateway` | `WhatsappGateway` |
 | Query object | `{Module}Query` en `business/{module}/` | `CommunityQuery` |
 | Paginación de dominio | `PageParams`, `PagedResult` en `business/shared/` | `PagedResult<Community>` |
-| Mapper HTTP (dominio ↔ DTO) | `{Module}Mapper` en `app/{module}/` | `CommunityMapper` |
+| Mapper HTTP (dominio ↔ DTO) | `{Module}Mapper` en `app/{module}/` | `CommunityApiMapper` |
 | Mapper entidad (JPA ↔ dominio) | `{Module}EntityMapper` en `data/{module}/` | `CommunityEntityMapper` |
 | Adaptador BD | `{Module}RepositoryImpl` en `data/{module}/` | `CooperationRepositoryImpl` |
 | Adaptador externo | `{Module}GatewayImpl` | `WhatsappGatewayImpl` |
