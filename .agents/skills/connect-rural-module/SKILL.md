@@ -1,90 +1,45 @@
 ---
 name: connect-rural-module
-description: "Guide for creating new dto modules in the connect-rural-api Spring Boot project. Use when adding a new entity, CRUD feature, or dto (e.g., 'add payments module', 'create invoices entity', 'implement CRUD for categories'). Covers the 3-layer architecture: data (Entity + Repository), business (Service + UseCases + Mapper + Specs), and app (Controller + DTOs)."
+description: "Guide for adding or migrating a domain in the current Maven multimodule Connect Rural API. Use when adding an entity, CRUD feature, or moving domain logic between api, services, repositories, and models."
 ---
 
-# Connect Rural Module Creator
+# Connect Rural domain module workflow
 
-## Overview
+## Source of truth
 
-Every new domain module spans three packages following the project's layered architecture:
-- `data/{module}` - Entity + Repository
-- `business/{module}` - Service + UseCases + Mapper + (Specs if filtered)
-- `app/{module}` - Controller + dto/request/ + dto/response/
+Read `docs/architecture.md` and inspect the current code before making changes. The migration is in progress: communities and residents work, but not every domain follows the same internal structure. Do not treat old templates or the existence of `api/app`, `api/business`, and `api/data` as proof that every domain has migrated.
 
-Read `references/templates.md` for complete code templates for each file.
+## Current Maven responsibilities
+
+- `models`: shared JPA entities.
+- `repositories`: Spring Data repositories and persistence queries/specifications.
+- `services`: domain services and domain/query models.
+- `api`: Spring Boot entry point, HTTP controllers/DTOs, configuration, and Liquibase migrations.
+
+Verify module POMs before adding dependencies. Keep dependency direction consistent with the current build: `repositories -> models`, `services -> repositories + models`, `api -> services + models`. Avoid introducing circular Maven dependencies.
 
 ## Workflow
 
-### Step 1: Determine scope
+1. **Trace an existing working domain.** For a community-level endpoint, inspect `api/app/community`, `services/service/community`, `repositories/repository/community`, and `models/model/CommunityEntity.java`. For community-scoped endpoints, inspect the corresponding resident files.
+2. **Determine whether this is a new domain or a migration.** For a migration, identify the active call path and existing tests first. Do not create a parallel service/repository implementation.
+3. **Keep HTTP concerns in `api`.** Controllers handle HTTP status, path/query/body binding, validation, and request/response mapping. Keep API DTOs in the API module.
+4. **Keep domain operations in `services`.** Use domain models/commands/queries rather than coupling service contracts to HTTP DTOs. Follow the concrete conventions of the closest migrated domain.
+5. **Keep persistence access in `repositories` and entities in `models`.** Add or change repository methods only when required by the domain operation. Avoid exposing persistence details unnecessarily through service contracts.
+6. **Scope community data correctly.** For community-scoped resources, ensure reads, updates, and deletes validate both the resource key and the owning `communityKey`.
+7. **Use Liquibase for schema changes.** Follow `.agents/skills/connect-rural-migration/SKILL.md`; confirm the master changelog's actual inclusion behavior rather than assuming it.
+8. **Preserve contracts.** Do not change endpoint paths, response shapes, soft-delete semantics, or database constraints unintentionally.
+9. **Test each layer appropriately.** Add service tests for business rules, repository/integration tests for persistence behavior, and API tests for HTTP validation/contracts where relevant. Run `mvn clean verify` when feasible.
+10. **Update architecture documentation** when the active path or migration status changes.
 
-**Top-level module** (e.g., community): Routes at `/api/{modules}`, no `communityKey` scoping.
+## Naming and mapping
 
-**Community-scoped module** (e.g., resident, cooperation): Routes at `/api/{communityKey}/{modules}`, all service queries filtered by `communityKey`.
+Follow the naming conventions used by the closest working domain rather than copying legacy templates blindly. Keep API DTOs distinct from service/domain models when practical. Mapping between API DTOs, domain models, and JPA entities should be explicit and located in the layer that owns each boundary.
 
-### Step 2: Create Data layer
+## Do not
 
-1. **Entity** (`data/{module}/{Module}Entity.java`):
-   - `@Entity @Table(name = "{table_name}", schema = "connect_rural")` — always include `schema = "connect_rural"`
-   - `@Data @NoArgsConstructor @AllArgsConstructor` (Lombok)
-   - UUID PK with `@GeneratedValue(strategy = GenerationType.UUID)`, column named `{module}_key`
-   - Timestamps: `created_at` (`updatable = false`) and `updated_at`
-
-2. **Repository** (`data/{module}/{Module}Repository.java`):
-   - Extends `JpaRepository<{Module}Entity, UUID>` + `JpaSpecificationExecutor<{Module}Entity>`
-
-3. **Migration SQL** (`resources/db/changelog/scripts/{version}.sql`):
-   - All DDL must be schema-qualified: `connect_rural.{table_name}`. See connect-rural-migration skill.
-   - The master changelog uses `<includeAll>` — no need to edit `db.changelog-master.xml`
-
-### Step 3: Create Business layer
-
-3. **Service** (`business/{module}/{Module}Service.java`):
-   - `@Service @RequiredArgsConstructor`
-   - Methods: `getAll()`, `getAllPaginatedAndFiltered(...)`, `getByKey(String key)`, `create(entity)`, `update(entity)`, `delete(String key)`
-   - `getByKey` throws `IllegalArgumentException("Entity not found")` if absent
-
-4. **Use Cases** (`business/{module}/usecases/`): One `@Component @AllArgsConstructor` class per operation, each with a single `execute(...)` method. Standard set:
-   - `Create{Module}UseCase` - maps DTO to entity, calls service.create, returns response DTO
-   - `Get{Module}ListUseCase` - calls service.getAll, maps list
-   - `Get{Module}PaginatedUseCase` - accepts filter DTO, calls paginated service, builds paginated response
-   - `Get{Module}ByKeyUseCase` - calls service.getByKey, maps to response
-   - `Update{Module}UseCase` - loads entity, calls mapper.updateFromDto, calls service.update
-   - `Delete{Module}UseCase` - calls service.delete (no return)
-
-5. **Mapper** (`business/{module}/mapper/{Module}AppMapper.java`):
-   - `@Component` (no constructor injection - uses plain `@Component`)
-   - `toResponse(entity)`, `toAdminResponse(entity)` if needed, `updateFromDto(dto, entity)`, list mapping helpers
-
-6. **Specs** (`business/{module}/specs/{Module}Specs.java`) - only if filtered queries needed:
-   - Static factory methods returning `Specification<{Module}Entity>`
-   - Use `withCommunity(UUID communityKey)` for community scoping + `withKeyword(String keyword)` for search
-
-### Step 4: Create App layer
-
-7. **Request DTOs** (`app/{module}/dto/request/`):
-   - `Create{Module}Dto` - `@Data @AllArgsConstructor @NoArgsConstructor`, validation annotations on fields
-   - `{Module}FilterDto` - fields: `keyword`, `page`, `size`
-
-8. **Response DTOs** (`app/{module}/dto/response/`):
-   - `{Module}ResponseDto` - flat response for create/get
-   - `{Module}PaginatedResponseDto` - wraps `List<{Module}ResponseDto>` + `page`, `size`, `totalElements`, `totalPages`
-
-9. **Controller** (`app/{module}/{Module}Controller.java`):
-   - `@RestController @RequestMapping("/api/...") @RequiredArgsConstructor`
-   - Inject all use cases (no services, no mappers directly)
-   - POST returns `ResponseEntity.status(201).body(...)`
-   - DELETE returns `ResponseEntity.noContent().build()`
-   - Paginated: accepts `@RequestParam` with defaults, builds FilterDto, delegates to use case
-
-## Key Conventions
-
-- All primary keys are `UUID`, exposed as `String` in DTOs (`key.toString()`)
-- All entities declare `schema = "connect_rural"` in `@Table`; JPA `hibernate.default_schema=connect_rural` is also set as fallback
-- `active` boolean for soft deletes where applicable
-- Use `@Valid` on `@RequestBody` params; validation errors handled globally
-- Mappers never throw; return `null` if input is `null`
-- Use `@AllArgsConstructor` (not `@RequiredArgsConstructor`) on use cases since all fields are final
-- Test profile (`application-test.properties`) uses H2 in `MODE=PostgreSQL` with `INIT` to create the `connect_rural` schema on startup; Liquibase disabled
-
-See `references/templates.md` for copy-paste code templates for all files.
+- Do not assume a hexagonal/clean architecture is fully implemented.
+- Do not put Spring Data/JPA types into service APIs without first checking the established pattern and migration decision.
+- Do not make controllers call repositories directly.
+- Do not call another domain's service directly just to bypass a missing domain operation; introduce an explicit contract or coordinate the design.
+- Do not add authentication based on obsolete role plans. CU-CR-022 depends on the definition of CU-CR-023 (users/roles) and CU-CR-025 (security audit).
+- Do not claim tests/build pass unless they were actually run.
