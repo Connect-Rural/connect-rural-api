@@ -137,9 +137,10 @@ mvn test
 
 La revisión de fuentes y POMs no sustituye la ejecución de estos comandos. No se debe afirmar que el build o los tests pasan sin ejecutarlos y comprobar el resultado.
 
-## 8. Pendientes de documentación
+## 8. Pendientes de arquitectura
 
-- Acordar y documentar el patrón objetivo para los nuevos dominios.
-- Revisar y sincronizar `AGENTS.md`, `CLAUDE.md` y las skills de `.agents/skills/` y `.claude/skills/`, porque contienen instrucciones de implementación que pueden contradecir esta arquitectura actual.
+- Consultar la [auditoría de arquitectura y migración](auditoria-arquitectura-2026-11.md), que documenta hallazgos y prioridades observados en `develop`.
+- Acordar y documentar el patrón objetivo para nuevos dominios y para las migraciones de los dominios intermedios.
 - Completar la matriz de migración con evidencias de pruebas y las implementaciones que se retiren.
 - Documentar los límites de dependencias permitidos entre paquetes y añadir pruebas arquitectónicas si el equipo decide adoptar reglas estrictas.
+- Corregir el fallo de CI documentado en la auditoría antes de usar `mvn clean verify` como señal de validación de las siguientes migraciones.
