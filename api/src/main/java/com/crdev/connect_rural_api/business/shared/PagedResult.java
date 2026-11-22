@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Resultado paginado del dominio.
  *
- * Sustituye a {@code org.springframework.data.domain.Page} en las interfaces
+ * Sustituye a {@code org.springframework.data.dto.Page} en las interfaces
  * puerto para que business/ no conozca Spring Data. La capa data traduce el
  * Page de JPA a este tipo; totalPages se recibe tal cual para mantener
  * exactamente el mismo contrato HTTP que hasta ahora.

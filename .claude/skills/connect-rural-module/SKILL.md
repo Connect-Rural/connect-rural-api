@@ -1,6 +1,6 @@
 ---
 name: connect-rural-module
-description: "Guide for creating new domain modules in the connect-rural-api Spring Boot project. Use when adding a new entity, CRUD feature, or domain (e.g., 'add payments module', 'create invoices entity', 'implement CRUD for categories'). Covers the 3-layer architecture: data (Entity + Repository), business (Service + UseCases + Mapper + Specs), and app (Controller + DTOs)."
+description: "Guide for creating new dto modules in the connect-rural-api Spring Boot project. Use when adding a new entity, CRUD feature, or dto (e.g., 'add payments module', 'create invoices entity', 'implement CRUD for categories'). Covers the 3-layer architecture: data (Entity + Repository), business (Service + UseCases + Mapper + Specs), and app (Controller + DTOs)."
 ---
 
 # Connect Rural Module Creator

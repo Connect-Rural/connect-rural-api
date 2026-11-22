@@ -9,6 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResidentFilterRequest {
     private String keyword;
-    private Integer page;
-    private Integer size;
 }

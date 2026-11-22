@@ -12,6 +12,9 @@ import java.util.UUID;
 public interface ResidentRepository extends JpaRepository<ResidentEntity, UUID>,
         JpaSpecificationExecutor<ResidentEntity> {
 
+
+    Optional<ResidentEntity> findByEmail(String email);
+
     List<ResidentEntity> findAllByCommunityKey(UUID communityKey);
 
     Optional<ResidentEntity> findByCommunityKeyAndKey(UUID communityKey, UUID residentKey);

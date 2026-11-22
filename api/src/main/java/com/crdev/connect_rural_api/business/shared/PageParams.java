@@ -4,7 +4,7 @@ package com.crdev.connect_rural_api.business.shared;
  * Parámetros de paginación del dominio.
  *
  * Vive en business/ para que las interfaces puerto no dependan de
- * {@code org.springframework.data.domain.Pageable}. La capa data traduce
+ * {@code org.springframework.data.dto.Pageable}. La capa data traduce
  * estos valores a {@code PageRequest}.
  *
  * Reglas: page debe ser >= 0 y size >= 1 (valores inválidos lanzan
