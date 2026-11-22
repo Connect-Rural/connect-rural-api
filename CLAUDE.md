@@ -1,225 +1,56 @@
-# CLAUDE.md
+# CLAUDE.md — Connect Rural API
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Estas instrucciones describen el estado observado en `develop`. Para arquitectura y estado de migración, consulta primero [`docs/architecture.md`](docs/architecture.md); si hay discrepancias, inspecciona el código y los POM actuales antes de decidir.
 
-## Commands
+## Stack y comandos
 
-```bash
-# Build
-mvn clean package           # Compile and package JAR
-mvn clean verify            # Build with all tests
+- Java 21, Spring Boot 3.5, Maven multimódulo, PostgreSQL, Liquibase.
+- Compilar y probar desde la raíz:
+  ```bash
+  mvn clean verify
+  mvn test
+  mvn test -Dtest=NombreDeClase
+  ```
+- Ejecuta las pruebas pertinentes después de cambios. No afirmes que el build pasa si no ejecutaste el comando y verificaste el resultado.
+- La configuración local usa `DATABASE_URL`, `DATABASE_USER` y `DATABASE_PASSWORD`. No leas ni publiques secretos de `.env`.
 
-# Run
-mvn spring-boot:run         # Start dev server on port 8080
+## Módulos Maven actuales
 
-# Test
-mvn test                    # Run all tests
-mvn test -Dtest=ClassName   # Run a single test class
-
-# Docker
-docker-compose up --build   # Build and start container
+```text
+models       Entidades JPA compartidas
+repositories Repositorios Spring Data y consultas de persistencia
+services     Servicios y modelos/consultas de negocio
+api          Aplicación Spring Boot, HTTP, configuración y migraciones
 ```
 
-Environment variables required locally (see `.env`): `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` pointing to a PostgreSQL instance. Also `WHATSAPP_GATEWAY_URL` (URL del gateway, default `http://localhost:8081`) y `APP_BASE_URL` (URL pública de este servicio, default `http://localhost:8080`) para la integración WhatsApp. El `appKey` por comunidad se almacena en `community.whatsappAppKey` en BD — no hay una variable global de tenant.
+Dependencias internas declaradas: `repositories -> models`, `services -> repositories + models`, `api -> services + models`. Comprueba los POM antes de cambiar dependencias.
 
-Current local DB target is `cr-development`; application tables run under schema `connect_rural`. UUID defaults must use `public.uuid_generate_v4()` (schema-qualified).
+## Estado arquitectónico
 
-Tests use an H2 in-memory database with profile `test` (see `src/test/resources/application-test.properties`).
+La migración es progresiva. Comunidades y residentes funcionan y sus controladores están en `api/app`, mientras sus servicios y modelos de negocio viven en `services/service`; persistencia y entidades están en `repositories` y `models`. Otros dominios todavía tienen implementaciones dentro de `api/business` y `api/data`.
 
-## Project Structure
+No asumas que todo el repositorio ya sigue un patrón uniforme. Antes de crear o migrar un dominio, traza el flujo real desde el controlador hasta el servicio, repositorio y entidad. No dupliques una implementación activa ni refactorices módulos funcionales solo para que se parezcan a una estructura objetivo aún no acordada.
 
-```
-connect-rural-api/
-├── src/
-│   ├── main/
-│   │   ├── java/com/crdev/connect_rural_api/
-│   │   │   ├── ConnectRuralApiApplication.java
-│   │   │   ├── app/
-│   │   │   │   ├── community/
-│   │   │   │   │   ├── CommunityController.java
-│   │   │   │   │   └── dto/                       ← Request + Response DTOs
-│   │   │   │   ├── resident/
-│   │   │   │   │   ├── ResidentController.java
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── cooperation/
-│   │   │   │   │   ├── CooperationController.java
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── file/
-│   │   │   │   │   ├── FileController.java
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── whatsapp/
-│   │   │   │   │   ├── WhatsappCallbackController.java
-│   │   │   │   │   └── dto/
-│   │   │   │   └── shared/
-│   │   │   │       └── GlobalExceptionHandler.java
-│   │   │   ├── business/
-│   │   │   │   ├── community/
-│   │   │   │   │   ├── CommunityService.java
-│   │   │   │   │   ├── CommunityRepository.java   ← interfaz (puerto BD)
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── resident/
-│   │   │   │   │   ├── ResidentService.java
-│   │   │   │   │   ├── ResidentRepository.java
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── cooperation/
-│   │   │   │   │   ├── CooperationService.java
-│   │   │   │   │   ├── CooperationRepository.java
-│   │   │   │   │   ├── CooperationAssignmentType.java
-│   │   │   │   │   ├── LateFeeCalculator.java
-│   │   │   │   │   └── dto/
-│   │   │   │   ├── cooperationresident/
-│   │   │   │   │   ├── CooperationResidentService.java
-│   │   │   │   │   └── CooperationResidentRepository.java
-│   │   │   │   ├── financialobligation/
-│   │   │   │   │   ├── FinancialObligationService.java
-│   │   │   │   │   └── FinancialObligationRepository.java
-│   │   │   │   ├── residentpayment/
-│   │   │   │   │   ├── ResidentPaymentService.java
-│   │   │   │   │   └── ResidentPaymentRepository.java
-│   │   │   │   ├── file/
-│   │   │   │   │   ├── FileService.java
-│   │   │   │   │   ├── FileRepository.java
-│   │   │   │   │   ├── FileGateway.java           ← interfaz (puerto MinIO)
-│   │   │   │   │   └── dto/
-│   │   │   │   └── whatsapp/
-│   │   │   │       ├── WhatsappService.java
-│   │   │   │       └── WhatsappGateway.java       ← interfaz (puerto gateway HTTP)
-│   │   │   ├── data/
-│   │   │   │   ├── community/
-│   │   │   │   │   ├── CommunityRepositoryImpl.java
-│   │   │   │   │   ├── CommunityJpaRepository.java
-│   │   │   │   │   ├── CommunityEntity.java
-│   │   │   │   │   └── CommunitySpecs.java
-│   │   │   │   ├── resident/
-│   │   │   │   ├── cooperation/
-│   │   │   │   ├── cooperationresident/
-│   │   │   │   ├── financialobligation/
-│   │   │   │   ├── residentpayment/
-│   │   │   │   ├── paymentallocation/
-│   │   │   │   ├── file/
-│   │   │   │   │   ├── FileRepositoryImpl.java
-│   │   │   │   │   ├── FileGatewayImpl.java       ← MinIO client
-│   │   │   │   │   ├── FileJpaRepository.java
-│   │   │   │   │   ├── FileObjectEntity.java
-│   │   │   │   │   └── FileStatus.java
-│   │   │   │   └── whatsapp/
-│   │   │   │       └── WhatsappGatewayImpl.java   ← RestClient HTTP
-│   │   │   └── config/
-│   │   │       ├── CorsConfig.java
-│   │   │       ├── MinioConfig.java
-│   │   │       └── WhatsappGatewayConfig.java
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       └── db/changelog/
-│   │           ├── db.changelog-master.xml
-│   │           └── scripts/      ← SQL migration files
-│   └── test/
-│       ├── java/.../ConnectRuralApiApplicationTests.java
-│       └── resources/application-test.properties
-├── .env                          ← Local DB credentials (not committed)
-├── docker-compose.yml
-├── Dockerfile
-└── pom.xml
-```
+## Reglas para cambios
 
-## Architecture
+1. Mantén el alcance limitado a la tarea solicitada.
+2. Respeta contratos HTTP, nombres de tablas, esquema `connect_rural` y comportamiento existente salvo que el cambio los requiera explícitamente.
+3. Las modificaciones de esquema deben hacerse mediante Liquibase; revisa las migraciones existentes y la skill `connect-rural-migration`.
+4. Verifica que el acceso a datos comunitarios esté correctamente acotado por `communityKey` cuando corresponda.
+5. No uses `ResidentEntity` como identidad autenticable sin una decisión explícita de dominio.
+6. No implementes autenticación ni autorización basándote en documentos de roles antiguos. Para CU-CR-022 hay dependencias funcionales pendientes de CU-CR-023 y CU-CR-025.
+7. Actualiza la documentación e instrucciones cuando el flujo real cambie; distingue arquitectura implementada de arquitectura objetivo.
+8. Nunca introduzcas secretos, credenciales o datos personales en commits, logs o respuestas.
 
-**Stack**: Spring Boot 3.5 · Java 21 · PostgreSQL · Liquibase · Lombok
+## Configuración y persistencia
 
-**Pattern**: Hexagonal Architecture (Ports & Adapters) in 3 layers. Full details in [`docs/architecture.md`](docs/architecture.md).
+- La aplicación usa PostgreSQL y el esquema `connect_rural`.
+- Liquibase administra las migraciones desde `api/src/main/resources/db/changelog/db.changelog-master.xml`.
+- `spring.jpa.hibernate.ddl-auto=none` en la configuración principal; no dependas de generación automática de esquema en producción.
+- El perfil de pruebas utiliza H2 y puede diferir de PostgreSQL. Si una migración depende de funciones específicas de PostgreSQL, verifica su ejecución contra PostgreSQL en un entorno seguro.
 
-```
-app/        ← HTTP adapters: Controllers + Request/Response DTOs
-business/   ← Domain: Services + Repository interfaces + Gateway interfaces + enums
-data/       ← Infrastructure: RepositoryImpl + JpaRepository + GatewayImpl + Entities + Specs
-config/     ← Spring configuration beans
-```
+## Documentación de referencia
 
-### Dependency Rules
-
-```
-Controller → Service                          ✓
-Service    → Repository (any module)          ✓
-Service    → Gateway                          ✓
-Service    → Service (another module)         ✗  never
-business   → data (direct import)             ✗  never
-```
-
-### Naming Conventions
-
-| Artifact | Pattern | Example |
-|---|---|---|
-| Controller | `{Module}Controller` | `CooperationController` |
-| Service | `{Module}Service` | `CooperationService` |
-| Repository interface | `{Module}Repository` in `business/` | `CooperationRepository` |
-| Gateway interface | `{Module}Gateway` in `business/` | `WhatsappGateway` |
-| Repository impl | `{Module}RepositoryImpl` in `data/` | `CooperationRepositoryImpl` |
-| Gateway impl | `{Module}GatewayImpl` in `data/` | `WhatsappGatewayImpl` |
-| Spring Data | `{Module}JpaRepository` in `data/` | `CooperationJpaRepository` |
-| JPA Entity | `{Module}Entity` | `CooperationEntity` |
-| JPA Specs | `{Module}Specs` in `data/` | `CooperationSpecs` |
-| Request DTO | `{Action}{Module}Request` | `CreateCooperationRequest` |
-| Response DTO | `{Module}Response` | `CooperationResponse` |
-| Paginated response | `{Module}PageResponse` | `CooperationPageResponse` |
-| Package names | lowercase, no camelCase | `cooperationresident/` |
-
-### Domain Modules
-
-- **community** — top-level entity. Routes: `/api/communities`
-- **resident** — scoped to a community. Routes: `/api/{communityKey}/residents`
-- **cooperation** — payment collection scoped to a community. Routes: `/api/{communityKey}/cooperations`
-- **cooperationresident** — junction table resident ↔ cooperation; no controller. Payment endpoints live under `/api/{communityKey}/cooperations/{cooperationKey}/residents/`
-- **financialobligation** — financial obligations; no controller
-- **residentpayment** — payment records; no controller
-- **file** — file metadata + MinIO storage. Routes: `/api/files`
-- **whatsapp** — integration with external whatsapp-gateway. Callback: `POST /api/whatsapp/events`
-
-### WhatsApp Gateway Integration
-
-Cada **comunidad** puede ser un tenant independiente en el `whatsapp-gateway`. El `tenantKey` se almacena en `community.whatsappAppKey`.
-
-**Flujo entrante** (Meta → gateway → connect-rural-api):
-1. Gateway llama `POST /api/whatsapp/events`
-2. `WhatsappService` resuelve la comunidad por `whatsappAppKey = event.tenantKey`
-
-**Flujo saliente** (connect-rural-api → gateway → Meta):
-1. `WhatsappService` llama `WhatsappGateway` con `appKey`, destinatario y texto
-2. `WhatsappGatewayImpl` hace `POST {gateway}/api/messages/send?appKey={appKey}`
-
-**Registro de tenant**:
-- `POST /api/communities/{key}/whatsapp` → registra comunidad en el gateway, guarda `appKey`
-- `DELETE /api/communities/{key}/whatsapp` → elimina tenant del gateway, limpia `appKey`
-
-### Cooperation Payment Flow
-
-`GET /{cooperationKey}/detail` returns a list of assigned residents with computed fields:
-- `paymentStatus`: `PAGADO` | `VENCIDO` (unpaid & past dueDate) | `PENDIENTE`
-- `baseAmount`, `lateFeeAmount` (only when `VENCIDO`), `totalAmount`
-- `amountPaid`, `paidAt`
-
-Payment operations on `CooperationService`:
-- `markAsPaid(cooperationKey, residentKey, paidAt?, amountPaid?)` — `PATCH .../residents/{residentKey}/pay`
-- `markAsUnpaid(cooperationKey, residentKey)` — `PATCH .../residents/{residentKey}/unpay`
-- `markAllAsPaid(cooperationKey)` — `PATCH .../residents/pay-all` — returns `{ updated: N }`
-
-### Cooperation Status Flow
-
-Cooperations have `status`: `OPEN` (default) or `CLOSED`.
-
-- `close(cooperationKey)` — `PATCH /api/{communityKey}/cooperations/{cooperationKey}/close` — sets `status=CLOSED` and records `closedAt`; throws `IllegalStateException` if already closed.
-
-### Database Migrations
-
-Schema changes go in `api/src/main/resources` as SQL files and must be referenced in `db.changelog-master.xml`. Liquibase is disabled in the test profile; H2 auto-creates the schema via `ddl-auto=create-drop`.
-
-All SQL migrations must use schema-qualified table names (`connect_rural.<table>`) and `public.uuid_generate_v4()` for UUID defaults. Unqualified references will break in production.
-
-### Key Conventions
-
-- UUID primary keys on all entities (`community_key`, `resident_key`, etc.)
-- Soft deletes via `active` boolean on community and resident entities
-- `{Module}Specs` in `data/` handle dynamic JPA filtering for paginated endpoints
-- Mappers live in `business/{module}/` as `{Module}Mapper` — they convert between entities and DTOs
-- `paymentallocation` module only has Repository interface/impl; no Service (accessed directly by `ResidentPaymentService`)
-- Validation errors return structured responses via `GlobalExceptionHandler` using `MethodArgumentNotValidException` and `ConstraintViolationException`
-- CORS configured in `CorsConfig.java` to allow `localhost:4200` (Angular frontend)
+- [Arquitectura actual y matriz de migración](docs/architecture.md)
+- [Skill de creación/migración de módulos](.agents/skills/connect-rural-module/SKILL.md)
+- [Skill de migraciones Liquibase](.agents/skills/connect-rural-migration/SKILL.md)
